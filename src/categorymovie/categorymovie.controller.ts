@@ -34,22 +34,6 @@ export class CategorymovieController {
   }
 
   @UseGuards(AuthGuard('auth'))
-  @Get('categories/:id')
-  async getCategoriesById(@Req() req: Request, @Res() res: Response) {
-    try {
-      const { id } = req.params;
-      await paramsId.validateAsync({ id });
-      const data = await this.categoryService.filterCategory({ _id: id });
-      return res.status(200).json(JsonResponse(false, 'query success', data));
-    } catch (e) {
-      if (e.isJoi) {
-        return res.status(422).json(JsonResponse(true, e.message));
-      }
-      return res.status(500).json(JsonResponse(true, e.message));
-    }
-  }
-
-  @UseGuards(AuthGuard('auth'))
   @Post('categories')
   async createCategory(@Req() req: Request, @Res() res: Response) {
     try {
