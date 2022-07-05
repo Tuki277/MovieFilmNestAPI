@@ -12,10 +12,12 @@ import { AuthRoleMiddleware } from './middlewares/authRole.middleware';
 import { MovieModule } from './movie/movie.module';
 import { CategorymovieModule } from './categorymovie/categorymovie.module';
 import { UserController } from './user/user.controller';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
     MongooseModule.forRoot(process.env.MONGO_URL),
+    MulterModule.register({ dest: './uploads' }),
     UserModule,
     AuthModule,
     MovieModule,

@@ -5,8 +5,12 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: true,
+  });
   app.enableCors();
+
+  app.useStaticAssets(join(__dirname, '..', 'static'));
 
   // const config = new DocumentBuilder()
   //   .setTitle('Swagger UI')

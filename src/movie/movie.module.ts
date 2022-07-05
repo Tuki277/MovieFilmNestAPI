@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CategorymovieService } from 'src/categorymovie/categorymovie.service';
 import {
   CategoriesMovieSchema,
   CategoryMovie,
@@ -16,7 +17,7 @@ import { Movie, MovieSchema } from './schema/movie.schema';
     ]),
   ],
   controllers: [MovieController],
-  providers: [MovieService],
+  providers: [MovieService, CategorymovieService],
   exports: [MovieService],
 })
 export class MovieModule {}

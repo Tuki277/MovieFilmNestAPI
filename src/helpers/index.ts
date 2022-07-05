@@ -1,6 +1,4 @@
 import * as bcrypt from 'bcrypt';
-import * as multer from 'multer';
-import * as util from 'util';
 
 export const hashPassword = async (password: string) => {
   try {
@@ -30,18 +28,11 @@ export const JsonResponse = (
   };
 };
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, '../../Demo/demo-nest/filesave/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, file.originalname);
-  },
-});
-
-const uploadFile = multer({
-  storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 },
-}).single('file');
-
-export const uploadFileHelper = util.promisify(uploadFile);
+export const getDateTimeNow = () => {
+  const today = new Date();
+  const date =
+    today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+  const time =
+    today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+  return `${date}_${time}`;
+};

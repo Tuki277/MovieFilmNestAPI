@@ -12,9 +12,9 @@ export class GetAccessTokenMiddleware implements NestMiddleware {
     @Next() next: NextFunction,
   ) {
     if (!req.headers.authorization) {
-      return res.json(JsonResponse(true, 'AccessToken is empty'));
-      // next();
-      // return;
+      // return res.json(JsonResponse(true, 'AccessToken is empty'));
+      next();
+      return;
     }
 
     const accessToken = req.headers.authorization?.replace(/^Bearer\s/, '');

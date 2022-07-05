@@ -68,7 +68,7 @@ export class CategorymovieService {
   async deleteCategory(id: string) {
     const dataResult = await this.categoryModel.findById(id);
     dataResult.movie.forEach((x) => {
-      this.movieService.deleteNews(x.toString());
+      this.movieService.deleteMovie(x.toString());
     });
     return this.categoryModel.findByIdAndDelete(id);
   }
