@@ -17,11 +17,15 @@ import {
   createCategorySchema,
   paramsId,
 } from './schema/categorymovie.validate';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { CategorySwagger } from 'src/swagger';
 
+@ApiTags('category')
 @Controller('api')
 export class CategorymovieController {
   constructor(private categoryService: CategorymovieService) {}
 
+  @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
   @Get('categories')
   async getAllCategories(@Req() req: Request, @Res() res: Response) {
@@ -33,7 +37,9 @@ export class CategorymovieController {
     }
   }
 
+  @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
+  @ApiBody({ type: CategorySwagger })
   @Post('categories')
   async createCategory(@Req() req: Request, @Res() res: Response) {
     try {
@@ -58,8 +64,10 @@ export class CategorymovieController {
     }
   }
 
+  @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
   @Delete('categories/:id')
+  @ApiParam({ name: 'id', type: 'string' })
   async deleteCategory(@Req() req: Request, @Res() res: Response) {
     try {
       const { id } = req.params;
@@ -74,8 +82,11 @@ export class CategorymovieController {
     }
   }
 
+  @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
+  @ApiBody({ type: CategorySwagger })
   @Patch('categories/:id')
+  @ApiParam({ name: 'id', type: 'string' })
   async updateCategory(@Req() req: Request, @Res() res: Response) {
     try {
       const { id } = req.params;

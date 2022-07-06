@@ -15,6 +15,10 @@ import { User, UserDocument } from './schemas/user.schema';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UserSwagger } from 'src/swagger';
 
+export interface Role extends Request {
+  role: any;
+}
+
 @ApiTags('user')
 @Controller('api')
 export class UserController {
@@ -24,7 +28,9 @@ export class UserController {
   @Get('user')
   async getAllUser(@Req() req: Request, @Res() res: Response) {
     try {
-      const data: User[] = await this.userService.getAllUser();
+      const data: User[] = await this.userService.getAllUser(
+        (req as Role).role,
+      );
       return res.status(200).json(JsonResponse(false, 'query success', data));
     } catch (e) {
       return res.status(500).json(JsonResponse(true, e.messages));

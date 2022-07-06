@@ -12,23 +12,21 @@ async function bootstrap() {
 
   app.useStaticAssets(join(__dirname, '..', 'static'));
 
-  // const config = new DocumentBuilder()
-  //   .setTitle('Swagger UI')
-  //   .setDescription('The Demo Nest API')
-  //   .setVersion('1.0')
-  //   .addTag('user')
-  //   .addTag('category')
-  //   .addTag('news')
-  //   .addTag('call')
-  //   .addTag('sync')
-  //   .addBearerAuth(
-  //     { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-  //     'auth',
-  //   )
-  //   .build();
+  const config = new DocumentBuilder()
+    .setTitle('Swagger UI')
+    .setDescription('The Demo Nest API')
+    .setVersion('1.0')
+    .addTag('user')
+    .addTag('category')
+    .addTag('movie')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'auth',
+    )
+    .build();
 
-  // const document = SwaggerModule.createDocument(app, config);
-  // SwaggerModule.setup('swagger', app, document);
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('swagger', app, document);
 
   await app.listen(3000);
 }

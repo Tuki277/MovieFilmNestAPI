@@ -34,11 +34,14 @@ export class UserSwagger {
   @ApiProperty({ required: true })
   age: number;
 
+  @ApiProperty({ required: true })
+  address: string;
+
   @ApiProperty({ required: false })
   role: number;
 }
 
-export class NewsSwagger {
+export class MovieSwagger {
   @ApiProperty({ required: true })
   title: string;
 
@@ -52,9 +55,4 @@ export class NewsSwagger {
 export class CategorySwagger {
   @ApiProperty({ required: true })
   title: string;
-}
-
-export class CallSwagger {
-  @ApiProperty({ required: true })
-  isCall: boolean;
 }

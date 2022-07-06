@@ -21,8 +21,9 @@ export class UserService {
     }
   }
 
-  async getAllUser(): Promise<User[]> {
+  async getAllUser(role: number): Promise<User[]> {
     return this.userModel.aggregate([
+      { $match: { role: { $gte: role } } },
       {
         $project: {
           username: 1,

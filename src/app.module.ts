@@ -13,6 +13,7 @@ import { MovieModule } from './movie/movie.module';
 import { CategorymovieModule } from './categorymovie/categorymovie.module';
 import { UserController } from './user/user.controller';
 import { MulterModule } from '@nestjs/platform-express';
+import { CategorymovieController } from './categorymovie/categorymovie.controller';
 
 @Module({
   imports: [
@@ -31,6 +32,8 @@ export class AppModule implements NestModule {
     consumer
       .apply(GetAccessTokenMiddleware)
       .forRoutes({ path: '/api/*', method: RequestMethod.ALL });
-    consumer.apply(AuthRoleMiddleware).forRoutes(UserController);
+    consumer
+      .apply(AuthRoleMiddleware)
+      .forRoutes(UserController, CategorymovieController);
   }
 }
