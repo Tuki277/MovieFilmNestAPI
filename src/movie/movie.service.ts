@@ -68,6 +68,7 @@ export class MovieService {
           views: 1,
           yearRelease: 1,
           status: 1,
+          fileName: 1,
           'category.title': 1,
           'authors.fullname': 1,
         },

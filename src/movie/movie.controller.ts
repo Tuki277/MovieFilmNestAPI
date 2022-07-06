@@ -19,6 +19,8 @@ import { getDateTimeNow, JsonResponse } from 'src/helpers';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
+import { User } from 'src/user/schemas/user.schema';
+import { UserService } from 'src/user/user.service';
 
 export interface IResponse extends Request {
   file: any;
@@ -30,6 +32,7 @@ export class MovieController {
   constructor(
     private movieService: MovieService,
     private categoryService: CategorymovieService,
+    private userService: UserService,
   ) {}
 
   @Get('video/:id')
@@ -59,6 +62,17 @@ export class MovieController {
     stream.pipe(res);
   }
 
+  @Get('download/:name')
+  async downloadFileReport(@Req() req: Request, @Res() res: Response) {
+    const fileName = req.params.name;
+    const directoryPath = '../../Demo/demo-movie/uploads/';
+    res.download(directoryPath + fileName, fileName, (err) => {
+      if (err) {
+        return res.status(500).json(JsonResponse(true, err.message));
+      }
+    });
+  }
+
   @Get('movie')
   @UseGuards(AuthGuard('auth'))
   async getAllMovieList(@Req() req: Request, @Res() res: Response) {
@@ -79,7 +93,7 @@ export class MovieController {
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, callback) => {
-          const filename = getDateTimeNow() + file.originalname;
+          const filename = file.originalname;
           callback(null, filename);
         },
       }),
@@ -88,9 +102,7 @@ export class MovieController {
   async createMovie(@Req() req: Request, @Res() res: Response) {
     const locationFileUpload = '../../Demo/demo-movie/uploads/';
     const renameFileUpload =
-      locationFileUpload +
-      getDateTimeNow() +
-      (req as IResponse).file.originalname;
+      locationFileUpload + (req as IResponse).file.originalname;
     const dataJson = JSON.parse(req.body.data);
 
     try {
@@ -98,6 +110,7 @@ export class MovieController {
         ...dataJson,
         authorCreated: (req as IResponse).user._id.toString(),
         filmLocation: renameFileUpload,
+        fileName: (req as IResponse).file.originalname,
       });
       if ((req as IResponse).file == undefined) {
         return res
@@ -108,6 +121,7 @@ export class MovieController {
         ...dataJson,
         authorCreated: (req as IResponse).user._id.toString(),
         filmLocation: renameFileUpload,
+        fileName: getDateTimeNow() + (req as IResponse).file.originalname,
       });
       const categoryId = dataJson.categoryMovie;
       const category: CategoryMovie = await this.categoryService.filterCategory(
@@ -115,6 +129,12 @@ export class MovieController {
           _id: categoryId,
         },
       );
+      const userId = (req as IResponse).user._id;
+      const user: User = await this.userService.filterUser({ _id: userId });
+      user.movie.push(movieCreated);
+      await this.userService.updateUser({ _id: userId }, user, {
+        new: true,
+      });
       if (category) {
         category.movie.push(movieCreated);
         await this.categoryService.updateCategory(

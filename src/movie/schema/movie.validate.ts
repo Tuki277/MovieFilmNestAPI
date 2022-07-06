@@ -9,6 +9,7 @@ export const createMovieSchema = Joi.object({
   filmLocation: Joi.string().required(),
   status: Joi.number().min(0).max(3),
   region: Joi.string().required(),
+  fileName: Joi.string().required(),
 });
 
 export const idPrams = Joi.object({

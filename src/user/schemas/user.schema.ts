@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
+import { Movie } from 'src/movie/schema/movie.schema';
 
 export type UserDocument = User & Document;
 
@@ -28,6 +29,12 @@ export class User {
 
   @Prop({ default: 0 })
   movieView: number;
+
+  @Prop([
+    { type: mongoose.Schema.Types.ObjectId, ref: 'movie' },
+    { default: [] },
+  ])
+  movie: Movie[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

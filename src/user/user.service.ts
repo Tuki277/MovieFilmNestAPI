@@ -22,7 +22,27 @@ export class UserService {
   }
 
   async getAllUser(): Promise<User[]> {
-    return this.userModel.find();
+    return this.userModel.aggregate([
+      {
+        $project: {
+          username: 1,
+          fullname: 1,
+          age: 1,
+          address: 1,
+          movieView: 1,
+          movie: 1,
+          role: 1,
+          createdAt: 1,
+          movieUpload: {
+            $cond: {
+              if: { $isArray: '$movie' },
+              then: { $size: '$movie' },
+              else: 0,
+            },
+          },
+        },
+      },
+    ]);
   }
 
   async deleteUser(id: string): Promise<User> {

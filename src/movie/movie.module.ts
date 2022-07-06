@@ -5,6 +5,8 @@ import {
   CategoriesMovieSchema,
   CategoryMovie,
 } from 'src/categorymovie/schema/categorymovie.schema';
+import { User, UserSchema } from 'src/user/schemas/user.schema';
+import { UserService } from 'src/user/user.service';
 import { MovieController } from './movie.controller';
 import { MovieService } from './movie.service';
 import { Movie, MovieSchema } from './schema/movie.schema';
@@ -14,10 +16,11 @@ import { Movie, MovieSchema } from './schema/movie.schema';
     MongooseModule.forFeature([
       { name: Movie.name, schema: MovieSchema },
       { name: CategoryMovie.name, schema: CategoriesMovieSchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
   controllers: [MovieController],
-  providers: [MovieService, CategorymovieService],
+  providers: [MovieService, CategorymovieService, UserService],
   exports: [MovieService],
 })
 export class MovieModule {}

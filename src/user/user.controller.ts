@@ -20,7 +20,6 @@ import { UserSwagger } from 'src/swagger';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
   @Get('user')
   async getAllUser(@Req() req: Request, @Res() res: Response) {
@@ -58,9 +57,7 @@ export class UserController {
     }
   }
 
-  @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
-  @ApiParam({ name: 'id', type: 'string' })
   @Delete('user/:id')
   async deleteUser(@Req() req: Request, @Res() res: Response) {
     try {
@@ -75,9 +72,7 @@ export class UserController {
     }
   }
 
-  @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
-  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({ type: UserSwagger })
   @Put('user/:id')
   async putUser(@Req() req: Request, @Res() res: Response) {

@@ -37,6 +37,9 @@ export class Movie {
 
   @Prop({ default: 0 }) // 0: pending, 1: updating, 3 done
   status: number;
+
+  @Prop({ required: true })
+  fileName: string;
 }
 
 export const MovieSchema = SchemaFactory.createForClass(Movie);
