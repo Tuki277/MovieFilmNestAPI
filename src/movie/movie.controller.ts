@@ -28,6 +28,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { MovieSwagger } from 'src/swagger';
 
 export interface IResponse extends Request {
   file: any;
@@ -120,18 +121,7 @@ export class MovieController {
   }
 
   @ApiBearerAuth('auth')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        data: { type: 'string' },
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
+  @ApiBody({ type: MovieSwagger })
   @ApiConsumes('multipart/form-data')
   @Post('movie/do=add')
   @UseGuards(AuthGuard('auth'))

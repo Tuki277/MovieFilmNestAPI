@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { binary } from 'joi';
 
 export class Login {
   @ApiProperty({ required: true })
@@ -42,14 +43,18 @@ export class UserSwagger {
 }
 
 export class MovieSwagger {
-  @ApiProperty({ required: true })
-  title: string;
+  @ApiProperty({
+    required: true,
+    description:
+      'ex: {"title": "Movie 2", "description": "description for movie 1", "categoryMovie": "62c314559ec8c509a481be40", "region": "VietNam", "status": 0 }',
+  })
+  data: string;
 
-  @ApiProperty({ required: true })
-  content: string;
-
-  @ApiProperty()
-  categories: string;
+  @ApiProperty({
+    required: true,
+    format: 'binary',
+  })
+  file: string;
 }
 
 export class CategorySwagger {
