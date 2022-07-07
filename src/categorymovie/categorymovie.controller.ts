@@ -27,7 +27,7 @@ export class CategorymovieController {
 
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
-  @Get('categories')
+  @Get('categories/do=all')
   async getAllCategories(@Req() req: Request, @Res() res: Response) {
     try {
       const data: CategoryMovie[] = await this.categoryService.getAllCategory();
@@ -40,7 +40,7 @@ export class CategorymovieController {
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
   @ApiBody({ type: CategorySwagger })
-  @Post('categories')
+  @Post('categories/do=add')
   async createCategory(@Req() req: Request, @Res() res: Response) {
     try {
       await createCategorySchema.validateAsync({
@@ -66,7 +66,7 @@ export class CategorymovieController {
 
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
-  @Delete('categories/:id')
+  @Delete('categories/do=delete/:id')
   @ApiParam({ name: 'id', type: 'string' })
   async deleteCategory(@Req() req: Request, @Res() res: Response) {
     try {
@@ -85,7 +85,7 @@ export class CategorymovieController {
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
   @ApiBody({ type: CategorySwagger })
-  @Patch('categories/:id')
+  @Patch('categories/do=edit/:id')
   @ApiParam({ name: 'id', type: 'string' })
   async updateCategory(@Req() req: Request, @Res() res: Response) {
     try {

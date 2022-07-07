@@ -37,8 +37,46 @@ export class MovieService {
     return this.movieModel.findByIdAndRemove(id);
   }
 
-  async filterMovie(id: string) {
-    return this.movieModel.findById(id);
+  async filterMovie(query: FilterQuery<MovieDocument>) {
+    if (query._id) {
+      query = {
+        _id: new mongoose.Types.ObjectId(query._id),
+      };
+    }
+    return this.movieModel.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: 'categorymovies',
+          localField: 'categoryMovie',
+          foreignField: '_id',
+          as: 'category',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'authorCreated',
+          foreignField: '_id',
+          as: 'authors',
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          description: 1,
+          filmLocation: 1,
+          region: 1,
+          views: 1,
+          yearRelease: 1,
+          status: 1,
+          fileName: 1,
+          authorCreated: 1,
+          'category.title': 1,
+          'authors.fullname': 1,
+        },
+      },
+    ]);
   }
 
   async getMovie() {

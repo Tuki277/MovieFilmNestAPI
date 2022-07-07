@@ -10,16 +10,16 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { MovieService } from './movie.service';
-import { Movie } from './schema/movie.schema';
+import { Movie, MovieDocument } from './schema/movie.schema';
 import { createMovieSchema, idPrams } from './schema/movie.validate';
 import { Request, Response } from 'express';
 import { CategoryMovie } from 'src/categorymovie/schema/categorymovie.schema';
 import { CategorymovieService } from 'src/categorymovie/categorymovie.service';
-import { getDateTimeNow, JsonResponse } from 'src/helpers';
+import { confirmUserCreated, getDateTimeNow, JsonResponse } from 'src/helpers';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
-import { User } from 'src/user/schemas/user.schema';
+import { User, UserDocument } from 'src/user/schemas/user.schema';
 import { UserService } from 'src/user/user.service';
 
 export interface IResponse extends Request {
@@ -40,8 +40,10 @@ export class MovieController {
     const { id } = req.params;
     const range = req.headers.range;
 
-    const dataResult = await this.movieService.filterMovie(id);
-    const videoPath = dataResult.filmLocation;
+    const dataResult: MovieDocument[] = await this.movieService.filterMovie({
+      _id: id,
+    });
+    const videoPath = dataResult[0].filmLocation;
     const videoSize = fs.statSync(videoPath).size;
 
     const chunkSize = 1 * 1e6;
@@ -62,18 +64,22 @@ export class MovieController {
     stream.pipe(res);
   }
 
-  @Get('download/:name')
+  @Get('movie/do=download/:id')
   async downloadFileReport(@Req() req: Request, @Res() res: Response) {
-    const fileName = req.params.name;
-    const directoryPath = '../../Demo/demo-movie/uploads/';
-    res.download(directoryPath + fileName, fileName, (err) => {
+    const { id } = req.params;
+    const movie: MovieDocument[] = await this.movieService.filterMovie({
+      _id: id,
+    });
+    const fileName = movie[0].fileName;
+    const directoryPath = movie[0].filmLocation;
+    res.download(directoryPath, fileName, (err) => {
       if (err) {
         return res.status(500).json(JsonResponse(true, err.message));
       }
     });
   }
 
-  @Get('movie')
+  @Get('movie/do=all')
   @UseGuards(AuthGuard('auth'))
   async getAllMovieList(@Req() req: Request, @Res() res: Response) {
     try {
@@ -86,7 +92,24 @@ export class MovieController {
     }
   }
 
-  @Post('movie')
+  @Get('movie/user')
+  @UseGuards(AuthGuard('auth'))
+  async getMovieByAccountId(@Req() req: Request, @Res() res: Response) {
+    try {
+      const userId: UserDocument = (req as IResponse).user;
+      const data: Movie[] = await this.movieService.filterMovie({
+        authorCreated: userId._id,
+      });
+      return res.status(200).json(JsonResponse(false, 'query success', data));
+    } catch (error) {
+      if (error.isJoi) {
+        return res.status(422).json(JsonResponse(true, error.message));
+      }
+      return res.status(500).json(JsonResponse(true, error.message));
+    }
+  }
+
+  @Post('movie/do=add')
   @UseGuards(AuthGuard('auth'))
   @UseInterceptors(
     FileInterceptor('file', {
@@ -157,13 +180,33 @@ export class MovieController {
   }
 
   @UseGuards(AuthGuard('auth'))
-  @Delete('movie/:id')
+  @Delete('movie/do=delete/:id')
   async deleteMovie(@Req() req: Request, @Res() res: Response) {
     try {
-      const id = req.params.id;
-      await idPrams.validateAsync({ id });
-      await this.movieService.deleteMovie(id);
-      return res.status(200).json(JsonResponse(false, 'deleted'));
+      const user: UserDocument = (req as IResponse).user;
+      const { id } = req.params;
+      const movieFilter: MovieDocument[] = await this.movieService.filterMovie({
+        _id: id,
+      });
+      if (movieFilter.length > 0) {
+        if (user.role === 3) {
+          if (
+            confirmUserCreated(
+              user._id.toString(),
+              movieFilter[0].authorCreated.toString(),
+            )
+          ) {
+            await idPrams.validateAsync({ id });
+            await this.movieService.deleteMovie(id);
+            return res.status(200).json(JsonResponse(false, 'deleted'));
+          }
+          return res.status(403).json(JsonResponse(false, 'forbidden'));
+        }
+        await idPrams.validateAsync({ id });
+        await this.movieService.deleteMovie(id);
+        return res.status(200).json(JsonResponse(false, 'deleted'));
+      }
+      return res.status(404).json(JsonResponse(false, 'not found'));
     } catch (e) {
       if (e.isJoi) {
         return res.status(422).json(JsonResponse(true, e.message));

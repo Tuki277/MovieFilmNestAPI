@@ -35,5 +35,8 @@ export class AppModule implements NestModule {
     consumer
       .apply(AuthRoleMiddleware)
       .forRoutes(UserController, CategorymovieController);
+    consumer
+      .apply(AuthRoleMiddleware)
+      .forRoutes({ path: '/api/movie', method: RequestMethod.GET });
   }
 }

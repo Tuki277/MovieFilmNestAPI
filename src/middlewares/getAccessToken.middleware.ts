@@ -1,7 +1,6 @@
 import { Injectable, NestMiddleware, Next, Req, Res } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { NextFunction, Request, Response } from 'express';
-import { JsonResponse } from '../helpers';
 
 @Injectable()
 export class GetAccessTokenMiddleware implements NestMiddleware {
@@ -12,7 +11,6 @@ export class GetAccessTokenMiddleware implements NestMiddleware {
     @Next() next: NextFunction,
   ) {
     if (!req.headers.authorization) {
-      // return res.json(JsonResponse(true, 'AccessToken is empty'));
       next();
       return;
     }

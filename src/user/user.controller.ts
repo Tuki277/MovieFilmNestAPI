@@ -15,8 +15,8 @@ import { User, UserDocument } from './schemas/user.schema';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UserSwagger } from 'src/swagger';
 
-export interface Role extends Request {
-  role: any;
+export interface ReqUser extends Request {
+  user: any;
 }
 
 @ApiTags('user')
@@ -25,11 +25,11 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @UseGuards(AuthGuard('auth'))
-  @Get('user')
+  @Get('user/do=all')
   async getAllUser(@Req() req: Request, @Res() res: Response) {
     try {
       const data: User[] = await this.userService.getAllUser(
-        (req as Role).role,
+        (req as ReqUser).user.role,
       );
       return res.status(200).json(JsonResponse(false, 'query success', data));
     } catch (e) {
@@ -64,7 +64,7 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard('auth'))
-  @Delete('user/:id')
+  @Delete('user/do=delete/:id')
   async deleteUser(@Req() req: Request, @Res() res: Response) {
     try {
       const id: string = req.params.id;
@@ -80,7 +80,7 @@ export class UserController {
 
   @UseGuards(AuthGuard('auth'))
   @ApiBody({ type: UserSwagger })
-  @Put('user/:id')
+  @Put('user/do=edit/:id')
   async putUser(@Req() req: Request, @Res() res: Response) {
     try {
       const id: string = req.params.id;

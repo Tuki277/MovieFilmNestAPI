@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import { idPrams } from 'src/movie/schema/movie.validate';
 
 export const hashPassword = async (password: string) => {
   try {
@@ -35,4 +36,11 @@ export const getDateTimeNow = () => {
   const time =
     today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
   return `${date}_${time}`;
+};
+
+export const confirmUserCreated = (idUser: string, idPrams: string) => {
+  if (idUser === idPrams) {
+    return true;
+  }
+  return false;
 };
