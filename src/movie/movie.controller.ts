@@ -21,12 +21,20 @@ import { diskStorage } from 'multer';
 import * as fs from 'fs';
 import { User, UserDocument } from 'src/user/schemas/user.schema';
 import { UserService } from 'src/user/user.service';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 export interface IResponse extends Request {
   file: any;
   user: any;
 }
 
+@ApiTags('movie')
 @Controller('api')
 export class MovieController {
   constructor(
@@ -35,6 +43,7 @@ export class MovieController {
     private userService: UserService,
   ) {}
 
+  @ApiParam({ name: 'id', type: 'string' })
   @Get('video/:id')
   async playVideoStream(@Req() req: Request, @Res() res: Response) {
     const { id } = req.params;
@@ -64,6 +73,7 @@ export class MovieController {
     stream.pipe(res);
   }
 
+  @ApiParam({ name: 'id', type: 'string' })
   @Get('movie/do=download/:id')
   async downloadFileReport(@Req() req: Request, @Res() res: Response) {
     const { id } = req.params;
@@ -80,7 +90,6 @@ export class MovieController {
   }
 
   @Get('movie/do=all')
-  @UseGuards(AuthGuard('auth'))
   async getAllMovieList(@Req() req: Request, @Res() res: Response) {
     try {
       const dataResult = await this.movieService.getMovie();
@@ -92,6 +101,7 @@ export class MovieController {
     }
   }
 
+  @ApiBearerAuth('auth')
   @Get('movie/user')
   @UseGuards(AuthGuard('auth'))
   async getMovieByAccountId(@Req() req: Request, @Res() res: Response) {
@@ -109,6 +119,20 @@ export class MovieController {
     }
   }
 
+  @ApiBearerAuth('auth')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'string' },
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiConsumes('multipart/form-data')
   @Post('movie/do=add')
   @UseGuards(AuthGuard('auth'))
   @UseInterceptors(
@@ -179,6 +203,8 @@ export class MovieController {
     }
   }
 
+  @ApiBearerAuth('auth')
+  @ApiParam({ name: 'id', type: 'string' })
   @UseGuards(AuthGuard('auth'))
   @Delete('movie/do=delete/:id')
   async deleteMovie(@Req() req: Request, @Res() res: Response) {

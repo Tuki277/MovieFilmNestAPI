@@ -13,6 +13,7 @@ import {
 } from 'src/categorymovie/schema/categorymovie.schema';
 import { Movie, MovieDocument } from './schema/movie.schema';
 import * as fs from 'fs';
+import { User, UserDocument } from 'src/user/schemas/user.schema';
 
 @Injectable()
 export class MovieService {
@@ -20,6 +21,7 @@ export class MovieService {
     @InjectModel(Movie.name) private movieModel: Model<MovieDocument>,
     @InjectModel(CategoryMovie.name)
     private categoryModel: Model<CategoryMovieDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
   async createMovie(input: DocumentDefinition<MovieDocument>): Promise<Movie> {
@@ -32,6 +34,10 @@ export class MovieService {
     fs.unlinkSync(fileLocation);
     await this.categoryModel.findByIdAndUpdate(
       { _id: movie.categoryMovie },
+      { $pull: { movie: movie._id.toString() } },
+    );
+    await this.userModel.findByIdAndUpdate(
+      { _id: movie.authorCreated },
       { $pull: { movie: movie._id.toString() } },
     );
     return this.movieModel.findByIdAndRemove(id);
