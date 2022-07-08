@@ -1,4 +1,4 @@
-import { Controller, Post, Req, Res } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Response, Request } from 'express';
 import { hashPassword, JsonResponse } from 'src/helpers';
@@ -8,6 +8,7 @@ import { registerSchema, loginSchema } from '../user/schemas/user.vaidate';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Login, RefreshToken, UserSwagger } from 'src/swagger';
 import { User, UserDocument } from 'src/user/schemas/user.schema';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -124,5 +125,16 @@ export class AuthController {
         return res.status(422).json(JsonResponse(true, e.message));
       }
     }
+  }
+
+  @UseGuards(AuthGuard('google'))
+  @Get('login/oauth-google')
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async signInWithGoogle() {}
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  googleAuthRedirect(@Req() req) {
+    return this.authService.signInWithGoogle(req);
   }
 }

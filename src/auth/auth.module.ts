@@ -8,6 +8,7 @@ import { jwtConstants } from './contants';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { UserService } from '../user/user.service';
 import { User, UserSchema } from '../user/schemas/user.schema';
+import { GoogleStrategy } from './strategy/google.strategy';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { User, UserSchema } from '../user/schemas/user.schema';
     PassportModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, UserService],
+  providers: [AuthService, JwtStrategy, UserService, GoogleStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

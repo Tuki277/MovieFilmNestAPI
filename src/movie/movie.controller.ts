@@ -90,6 +90,8 @@ export class MovieController {
     });
   }
 
+  // @UseGuards(AuthGuard('google'))
+  @UseGuards(AuthGuard('auth'))
   @Get('movie/do=all')
   async getAllMovieList(@Req() req: Request, @Res() res: Response) {
     try {
