@@ -90,8 +90,17 @@ export class MovieController {
     });
   }
 
+  @Post('movie/do=search')
+  async filterMovie(@Req() req: Request, @Res() res: Response) {
+    const { text } = req.body;
+    const movie: MovieDocument[] = await this.movieService.filterMovie({
+      title: { $regex: new RegExp(text, 'i') },
+    });
+    return res.status(200).json(JsonResponse(false, 'query success', movie));
+  }
+
   // @UseGuards(AuthGuard('google'))
-  @UseGuards(AuthGuard('auth'))
+  // @UseGuards(AuthGuard('auth'))
   @Get('movie/do=all')
   async getAllMovieList(@Req() req: Request, @Res() res: Response) {
     try {
