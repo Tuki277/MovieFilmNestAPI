@@ -1,19 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, {
-  DocumentDefinition,
-  FilterQuery,
-  Model,
-  QueryOptions,
-  UpdateQuery,
-} from 'mongoose';
+import mongoose, { DocumentDefinition, FilterQuery, Model } from 'mongoose';
 import {
   CategoryMovie,
   CategoryMovieDocument,
-} from 'src/categorymovie/schema/categorymovie.schema';
+} from '../categorymovie/schema/categorymovie.schema';
 import { Movie, MovieDocument } from './schema/movie.schema';
 import * as fs from 'fs';
-import { User, UserDocument } from 'src/user/schemas/user.schema';
+import { User, UserDocument } from '../user/schemas/user.schema';
 
 @Injectable()
 export class MovieService {

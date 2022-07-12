@@ -9,11 +9,11 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Request, Response } from 'express';
-import { hashPassword, JsonResponse } from 'src/helpers';
+import { hashPassword, JsonResponse } from '../helpers';
 import { AuthGuard } from '@nestjs/passport';
 import { User, UserDocument } from './schemas/user.schema';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { UserSwagger } from 'src/swagger';
+import { UserSwagger } from '../swagger';
 
 export interface ReqUser extends Request {
   user: any;

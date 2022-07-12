@@ -13,14 +13,14 @@ import { MovieService } from './movie.service';
 import { Movie, MovieDocument } from './schema/movie.schema';
 import { createMovieSchema, idPrams } from './schema/movie.validate';
 import { Request, Response } from 'express';
-import { CategoryMovie } from 'src/categorymovie/schema/categorymovie.schema';
-import { CategorymovieService } from 'src/categorymovie/categorymovie.service';
-import { confirmUserCreated, getDateTimeNow, JsonResponse } from 'src/helpers';
+import { CategoryMovie } from '../categorymovie/schema/categorymovie.schema';
+import { CategorymovieService } from '../categorymovie/categorymovie.service';
+import { confirmUserCreated, getDateTimeNow, JsonResponse } from '../helpers';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
-import { User, UserDocument } from 'src/user/schemas/user.schema';
-import { UserService } from 'src/user/user.service';
+import { User, UserDocument } from '../user/schemas/user.schema';
+import { UserService } from '../user/user.service';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -28,7 +28,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { MovieSwagger } from 'src/swagger';
+import { MovieSwagger } from '../swagger';
 
 export interface IResponse extends Request {
   file: any;

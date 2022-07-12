@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CategorymovieService } from 'src/categorymovie/categorymovie.service';
+import { CategorymovieService } from '../categorymovie/categorymovie.service';
 import {
   CategoriesMovieSchema,
   CategoryMovie,
-} from 'src/categorymovie/schema/categorymovie.schema';
-import { User, UserSchema } from 'src/user/schemas/user.schema';
-import { UserService } from 'src/user/user.service';
+} from '../categorymovie/schema/categorymovie.schema';
+import { User, UserSchema } from '../user/schemas/user.schema';
+import { UserService } from '../user/user.service';
 import { MovieController } from './movie.controller';
 import { MovieService } from './movie.service';
 import { Movie, MovieSchema } from './schema/movie.schema';

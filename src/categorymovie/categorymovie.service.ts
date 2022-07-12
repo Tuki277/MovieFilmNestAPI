@@ -11,7 +11,7 @@ import {
   QueryOptions,
   UpdateQuery,
 } from 'mongoose';
-import { MovieService } from 'src/movie/movie.service';
+import { MovieService } from '../movie/movie.service';
 
 @Injectable()
 export class CategorymovieService {
