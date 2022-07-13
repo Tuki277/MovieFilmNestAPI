@@ -1,0 +1,27 @@
+version: '3.9'
+
+networks:
+  dev:
+    driver: bridge
+
+services:
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - 27017:27017
+    volumes:
+      - ~/apps/mongo:/data/mongodb
+    container_name: mongodb
+    networks:
+      - dev
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    networks:
+      - dev
