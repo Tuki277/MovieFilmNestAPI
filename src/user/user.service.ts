@@ -1,67 +1,61 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import {
   DocumentDefinition,
   FilterQuery,
-  Model,
   QueryOptions,
   UpdateQuery,
 } from 'mongoose';
+import { hashPassword } from 'src/helpers';
 import { User, UserDocument } from './schemas/user.schema';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(private userRepository: UserRepository) {}
 
   async createUser(input: DocumentDefinition<UserDocument>): Promise<User> {
     try {
-      return await this.userModel.create(input);
+      return await this.userRepository.createUser(input);
     } catch (error) {
       throw new Error(error);
     }
   }
 
   async getAllUser(role: number): Promise<User[]> {
-    return this.userModel.aggregate([
-      { $match: { role: { $gte: role } } },
-      {
-        $project: {
-          username: 1,
-          fullname: 1,
-          age: 1,
-          address: 1,
-          movieView: 1,
-          movie: 1,
-          role: 1,
-          createdAt: 1,
-          movieUpload: {
-            $cond: {
-              if: { $isArray: '$movie' },
-              then: { $size: '$movie' },
-              else: 0,
-            },
-          },
-        },
-      },
-    ]);
+    return await this.userRepository.getAllUser(role);
   }
 
   async deleteUser(id: string): Promise<User> {
-    return this.userModel.findByIdAndDelete(id);
+    return this.userRepository.deleteUser(id);
   }
 
   async filterUser(
     query: FilterQuery<UserDocument>,
     options: QueryOptions = { lean: true },
   ) {
-    return this.userModel.findOne(query, {}, options);
+    return this.userRepository.filterUser(query, options);
   }
 
   async updateUser(
     query: FilterQuery<UserDocument>,
     update: UpdateQuery<UserDocument>,
-    options: QueryOptions,
-  ): Promise<User> {
-    return this.userModel.findOneAndUpdate(query, update, options);
+  ) {
+    const dataResult: User = await this.userRepository.filterUser(query);
+    if (dataResult) {
+      if (update.username !== '') {
+        const password = await hashPassword(update.password);
+        const dataUpdateBody = {
+          ...update,
+          password,
+        };
+        await this.userRepository.updateUser(query, dataUpdateBody, {
+          new: true,
+        });
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return 0;
   }
 }

@@ -64,23 +64,23 @@ export class CategorymovieController {
     }
   }
 
-  @ApiBearerAuth('auth')
-  @UseGuards(AuthGuard('auth'))
-  @Delete('categories/do=delete/:id')
-  @ApiParam({ name: 'id', type: 'string' })
-  async deleteCategory(@Req() req: Request, @Res() res: Response) {
-    try {
-      const { id } = req.params;
-      await paramsId.validateAsync({ id });
-      await this.categoryService.deleteCategory(id);
-      return res.status(200).json(JsonResponse(false, 'deleted'));
-    } catch (e) {
-      if (e.isJoi) {
-        return res.status(422).json(JsonResponse(true, e.message));
-      }
-      return res.status(500).json(JsonResponse(true, e.message));
-    }
-  }
+  // // @ApiBearerAuth('auth')
+  // // @UseGuards(AuthGuard('auth'))
+  // // @Delete('categories/do=delete/:id')
+  // // @ApiParam({ name: 'id', type: 'string' })
+  // // async deleteCategory(@Req() req: Request, @Res() res: Response) {
+  // //   try {
+  // //     const { id } = req.params;
+  // //     await paramsId.validateAsync({ id });
+  // //     await this.categoryService.deleteCategory(id);
+  // //     return res.status(200).json(JsonResponse(false, 'deleted'));
+  // //   } catch (e) {
+  // //     if (e.isJoi) {
+  // //       return res.status(422).json(JsonResponse(true, e.message));
+  // //     }
+  // //     return res.status(500).json(JsonResponse(true, e.message));
+  // //   }
+  // // }
 
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))

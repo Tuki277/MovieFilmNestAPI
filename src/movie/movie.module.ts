@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CategoryMovieRepository } from 'src/categorymovie/categorymovie.repository';
 import { CategorymovieService } from '../categorymovie/categorymovie.service';
 import {
   CategoriesMovieSchema,
@@ -8,6 +9,7 @@ import {
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { UserService } from '../user/user.service';
 import { MovieController } from './movie.controller';
+import { MovieRepository } from './movie.repository';
 import { MovieService } from './movie.service';
 import { Movie, MovieSchema } from './schema/movie.schema';
 
@@ -20,7 +22,13 @@ import { Movie, MovieSchema } from './schema/movie.schema';
     ]),
   ],
   controllers: [MovieController],
-  providers: [MovieService, CategorymovieService, UserService],
+  providers: [
+    MovieService,
+    CategorymovieService,
+    CategoryMovieRepository,
+    MovieRepository,
+    // UserService
+  ],
   exports: [MovieService],
 })
 export class MovieModule {}

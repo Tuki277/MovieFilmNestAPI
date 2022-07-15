@@ -9,6 +9,8 @@ import {
   CategoriesMovieSchema,
   CategoryMovie,
 } from './schema/categorymovie.schema';
+import { CategoryMovieRepository } from './categorymovie.repository';
+import { MovieRepository } from 'src/movie/movie.repository';
 
 @Module({
   imports: [
@@ -19,6 +21,12 @@ import {
     ]),
   ],
   controllers: [CategorymovieController],
-  providers: [CategorymovieService, MovieService],
+  providers: [
+    CategorymovieService,
+    MovieService,
+    CategoryMovieRepository,
+    MovieRepository,
+  ],
+  exports: [CategorymovieService],
 })
 export class CategorymovieModule {}

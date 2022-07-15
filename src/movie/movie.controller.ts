@@ -44,133 +44,129 @@ export interface IResponse extends Request {
 @Controller('api')
 export class MovieController {
   constructor(
-    private movieService: MovieService,
-    private categoryService: CategorymovieService,
-    private userService: UserService,
+    private movieService: MovieService, // private categoryService: CategorymovieService, // private userService: UserService,
   ) {}
 
-  @ApiParam({ name: 'id', type: 'string' })
-  @Get('video/:id')
-  async playVideoStream(@Req() req: Request, @Res() res: Response) {
-    const { id } = req.params;
-    const range = req.headers.range;
+  // @ApiParam({ name: 'id', type: 'string' })
+  // @Get('video/:id')
+  // async playVideoStream(@Req() req: Request, @Res() res: Response) {
+  //   const { id } = req.params;
+  //   const range = req.headers.range;
 
-    const dataResult: MovieDocument[] = await this.movieService.filterMovie({
-      _id: id,
-    });
-    const videoPath = dataResult[0].filmLocation;
-    const videoSize = fs.statSync(videoPath).size;
+  //   const dataResult: MovieDocument[] = await this.movieService.filterMovie({
+  //     _id: id,
+  //   });
+  //   const videoPath = dataResult[0].filmLocation;
+  //   const videoSize = fs.statSync(videoPath).size;
 
-    const chunkSize = 1 * 1e6;
-    const start = Number(range.replace(/\D/g, ''));
-    const end = Math.min(start + chunkSize, videoSize - 1);
+  //   const chunkSize = 1 * 1e6;
+  //   const start = Number(range.replace(/\D/g, ''));
+  //   const end = Math.min(start + chunkSize, videoSize - 1);
 
-    const contentLength = end - start + 1;
+  //   const contentLength = end - start + 1;
 
-    const headers = {
-      'Content-Range': `bytes ${start}-${end}/${videoSize}`,
-      'Accept-Ranges': 'bytes',
-      'Content-Length': contentLength,
-      'Content-Type': 'video/mp4',
-    };
-    res.writeHead(206, headers);
+  //   const headers = {
+  //     'Content-Range': `bytes ${start}-${end}/${videoSize}`,
+  //     'Accept-Ranges': 'bytes',
+  //     'Content-Length': contentLength,
+  //     'Content-Type': 'video/mp4',
+  //   };
+  //   res.writeHead(206, headers);
 
-    const stream = fs.createReadStream(videoPath, { start, end });
-    stream.pipe(res);
-  }
+  //   const stream = fs.createReadStream(videoPath, { start, end });
+  //   stream.pipe(res);
+  // }
 
-  @ApiParam({ name: 'id', type: 'string' })
-  @Get('movie/do=download/:id')
-  async downloadFileReport(@Req() req: Request, @Res() res: Response) {
-    const { id } = req.params;
-    const movie: MovieDocument[] = await this.movieService.filterMovie({
-      _id: id,
-    });
-    const fileName = movie[0].fileName;
-    const directoryPath = movie[0].filmLocation;
-    res.download(directoryPath, fileName, (err) => {
-      if (err) {
-        return res.status(500).json(JsonResponse(true, err.message));
-      }
-    });
-  }
+  // @ApiParam({ name: 'id', type: 'string' })
+  // @Get('movie/do=download/:id')
+  // async downloadFileReport(@Req() req: Request, @Res() res: Response) {
+  //   const { id } = req.params;
+  //   const movie: MovieDocument[] = await this.movieService.filterMovie({
+  //     _id: id,
+  //   });
+  //   const fileName = movie[0].fileName;
+  //   const directoryPath = movie[0].filmLocation;
+  //   res.download(directoryPath, fileName, (err) => {
+  //     if (err) {
+  //       return res.status(500).json(JsonResponse(true, err.message));
+  //     }
+  //   });
+  // }
 
-  @UseGuards(AuthGuard('auth'))
-  @Post('movie/do=buy')
-  async buyMovie(@Req() req: Request, @Res() res: Response) {
-    try {
-      const { email, amount, currency, movieId } = req.body;
-      const customer = await stripe.customers.list({
-        email,
-      });
-      if (customer.data.length > 0) {
-        const cusId = customer.data[0].id;
-        const charge = await stripe.charges.create({
-          customer: cusId,
-          currency,
-          amount,
-        });
-        if (charge.status === 'succeeded') {
-          const userId = (req as IResponse).user._id;
-          const user: User = await this.userService.filterUser({ _id: userId });
-          const findIdMovie: MovieDocument[] =
-            await this.movieService.filterMovie({
-              _id: movieId,
-            });
-          if (findIdMovie.length > 0) {
-            user.movieBuy.push(findIdMovie[0]._id);
-            await this.userService.updateUser({ _id: userId }, user, {
-              new: true,
-            });
-            return res.status(200).json(JsonResponse(false, 'buy success'));
-          }
-          return res.status(404).json(JsonResponse(false, 'not found'));
-        }
-        return res.status(500).json(JsonResponse(false, 'pay fail'));
-      }
-      return res.status(404).json(JsonResponse(false, 'not found'));
-    } catch (error) {
-      return res.status(500).json(JsonResponse(true, error.message));
-    }
-  }
+  // @UseGuards(AuthGuard('auth'))
+  // @Post('movie/do=buy')
+  // async buyMovie(@Req() req: Request, @Res() res: Response) {
+  //   try {
+  //     const { email, amount, currency, movieId } = req.body;
+  //     const customer = await stripe.customers.list({
+  //       email,
+  //     });
+  //     if (customer.data.length > 0) {
+  //       const cusId = customer.data[0].id;
+  //       const charge = await stripe.charges.create({
+  //         customer: cusId,
+  //         currency,
+  //         amount,
+  //       });
+  //       if (charge.status === 'succeeded') {
+  //         const userId = (req as IResponse).user._id;
+  //         const user: User = await this.userService.filterUser({ _id: userId });
+  //         const findIdMovie: MovieDocument[] =
+  //           await this.movieService.filterMovie({
+  //             _id: movieId,
+  //           });
+  //         if (findIdMovie.length > 0) {
+  //           user.movieBuy.push(findIdMovie[0]._id);
+  //           await this.userService.updateUser({ _id: userId }, user, {
+  //             new: true,
+  //           });
+  //           return res.status(200).json(JsonResponse(false, 'buy success'));
+  //         }
+  //         return res.status(404).json(JsonResponse(false, 'not found'));
+  //       }
+  //       return res.status(500).json(JsonResponse(false, 'pay fail'));
+  //     }
+  //     return res.status(404).json(JsonResponse(false, 'not found'));
+  //   } catch (error) {
+  //     return res.status(500).json(JsonResponse(true, error.message));
+  //   }
+  // }
 
-  @Get('movie/do=detail/:id')
-  async getMovieById(@Req() req: Request, @Res() res: Response) {
-    const { id } = req.params;
-    const movie = await this.movieService.filterMovie({
-      _id: id,
-    });
-    if (movie.length > 0) {
-      const idUser = (req as IResponse).user;
-      const userFind: UserDocument = await this.userService.filterUser({
-        _id: idUser,
-      });
-      const found = userFind.movieBuy.find((x) => x.toString() == id);
-      if (found !== undefined) {
-        return res.status(200).json(
-          JsonResponse(false, 'query success', {
-            ...movie,
-            watch: true,
-          }),
-        );
-      }
-      return res.status(200).json(
-        JsonResponse(false, 'query success', {
-          ...movie,
-          watch: false,
-        }),
-      );
-    }
-    return res.status(404).json(JsonResponse(false, 'not found'));
-  }
+  // @Get('movie/do=detail/:id')
+  // async getMovieById(@Req() req: Request, @Res() res: Response) {
+  //   const { id } = req.params;
+  //   const idUser = (req as IResponse).user;
+  //   const movie = await this.movieService.detailMovie(id, idUser);
+  //   if (movie.length > 0) {
+  //     const idUser = (req as IResponse).user;
+  //     const userFind: UserDocument = await this.userService.filterUser({
+  //       _id: idUser,
+  //     });
+  //     const found = userFind.movieBuy.find((x) => x.toString() == id);
+  //     if (found !== undefined) {
+  //       return res.status(200).json(
+  //         JsonResponse(false, 'query success', {
+  //           ...movie,
+  //           watch: true,
+  //         }),
+  //       );
+  //     }
+  //     return res.status(200).json(
+  //       JsonResponse(false, 'query success', {
+  //         ...movie,
+  //         watch: false,
+  //       }),
+  //     );
+  //   }
+  //   return res.status(404).json(JsonResponse(false, 'not found'));
+  // }
 
   @Post('movie/do=search')
   async filterMovie(@Req() req: Request, @Res() res: Response) {
-    const { text } = req.body;
-    const movie: MovieDocument[] = await this.movieService.filterMovie({
-      title: { $regex: new RegExp(text, 'i') },
-    });
-    return res.status(200).json(JsonResponse(false, 'query success', movie));
+    const movieResult = await this.movieService.searchMovie(req.body);
+    return res
+      .status(200)
+      .json(JsonResponse(false, 'query success', movieResult));
   }
 
   @Get('movie/do=all')
@@ -203,114 +199,114 @@ export class MovieController {
     }
   }
 
-  @ApiBearerAuth('auth')
-  @ApiBody({ type: MovieSwagger })
-  @ApiConsumes('multipart/form-data')
-  @Post('movie/do=add')
-  @UseGuards(AuthGuard('auth'))
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const filename = file.originalname;
-          callback(null, filename);
-        },
-      }),
-    }),
-  )
-  async createMovie(@Req() req: Request, @Res() res: Response) {
-    const locationFileUpload = '../../Demo/demo-movie/uploads/';
-    const renameFileUpload =
-      locationFileUpload + (req as IResponse).file.originalname;
-    const dataJson = JSON.parse(req.body.data);
+  // @ApiBearerAuth('auth')
+  // @ApiBody({ type: MovieSwagger })
+  // @ApiConsumes('multipart/form-data')
+  // @Post('movie/do=add')
+  // @UseGuards(AuthGuard('auth'))
+  // @UseInterceptors(
+  //   FileInterceptor('file', {
+  //     storage: diskStorage({
+  //       destination: './uploads',
+  //       filename: (req, file, callback) => {
+  //         const filename = file.originalname;
+  //         callback(null, filename);
+  //       },
+  //     }),
+  //   }),
+  // )
+  // async createMovie(@Req() req: Request, @Res() res: Response) {
+  //   const locationFileUpload = '../../Demo/demo-movie/uploads/';
+  //   const renameFileUpload =
+  //     locationFileUpload + (req as IResponse).file.originalname;
+  //   const dataJson = JSON.parse(req.body.data);
 
-    try {
-      await createMovieSchema.validateAsync({
-        ...dataJson,
-        authorCreated: (req as IResponse).user._id.toString(),
-        filmLocation: renameFileUpload,
-        fileName: (req as IResponse).file.originalname,
-      });
-      if ((req as IResponse).file == undefined) {
-        return res
-          .status(400)
-          .json(JsonResponse(true, 'File upload not empty'));
-      }
-      const movieCreated: Movie = await this.movieService.createMovie({
-        ...dataJson,
-        authorCreated: (req as IResponse).user._id.toString(),
-        filmLocation: renameFileUpload,
-        fileName: getDateTimeNow() + (req as IResponse).file.originalname,
-      });
-      const categoryId = dataJson.categoryMovie;
-      const category: CategoryMovie = await this.categoryService.filterCategory(
-        {
-          _id: categoryId,
-        },
-      );
-      const userId = (req as IResponse).user._id;
-      const user: User = await this.userService.filterUser({ _id: userId });
-      user.movie.push(movieCreated);
-      await this.userService.updateUser({ _id: userId }, user, {
-        new: true,
-      });
-      if (category) {
-        category.movie.push(movieCreated);
-        await this.categoryService.updateCategory(
-          { _id: categoryId },
-          category,
-          {
-            new: true,
-          },
-        );
-      }
-      return res
-        .status(200)
-        .json(JsonResponse(false, 'created', { movieCreated, category }));
-    } catch (error) {
-      if (error.isJoi) {
-        return res.status(422).json(JsonResponse(true, error.message));
-      }
-      return res.status(500).json(JsonResponse(true, error.message));
-    }
-  }
+  //   try {
+  //     await createMovieSchema.validateAsync({
+  //       ...dataJson,
+  //       authorCreated: (req as IResponse).user._id.toString(),
+  //       filmLocation: renameFileUpload,
+  //       fileName: (req as IResponse).file.originalname,
+  //     });
+  //     if ((req as IResponse).file == undefined) {
+  //       return res
+  //         .status(400)
+  //         .json(JsonResponse(true, 'File upload not empty'));
+  //     }
+  //     const movieCreated: Movie = await this.movieService.createMovie({
+  //       ...dataJson,
+  //       authorCreated: (req as IResponse).user._id.toString(),
+  //       filmLocation: renameFileUpload,
+  //       fileName: getDateTimeNow() + (req as IResponse).file.originalname,
+  //     });
+  //     const categoryId = dataJson.categoryMovie;
+  //     const category: CategoryMovie = await this.categoryService.filterCategory(
+  //       {
+  //         _id: categoryId,
+  //       },
+  //     );
+  //     const userId = (req as IResponse).user._id;
+  //     const user: User = await this.userService.filterUser({ _id: userId });
+  //     user.movie.push(movieCreated);
+  //     await this.userService.updateUser({ _id: userId }, user, {
+  //       new: true,
+  //     });
+  //     if (category) {
+  //       category.movie.push(movieCreated);
+  //       await this.categoryService.updateCategory(
+  //         { _id: categoryId },
+  //         category,
+  //         {
+  //           new: true,
+  //         },
+  //       );
+  //     }
+  //     return res
+  //       .status(200)
+  //       .json(JsonResponse(false, 'created', { movieCreated, category }));
+  //   } catch (error) {
+  //     if (error.isJoi) {
+  //       return res.status(422).json(JsonResponse(true, error.message));
+  //     }
+  //     return res.status(500).json(JsonResponse(true, error.message));
+  //   }
+  // }
 
-  @ApiBearerAuth('auth')
-  @ApiParam({ name: 'id', type: 'string' })
-  @UseGuards(AuthGuard('auth'))
-  @Delete('movie/do=delete/:id')
-  async deleteMovie(@Req() req: Request, @Res() res: Response) {
-    try {
-      const user: UserDocument = (req as IResponse).user;
-      const { id } = req.params;
-      const movieFilter: MovieDocument[] = await this.movieService.filterMovie({
-        _id: id,
-      });
-      if (movieFilter.length > 0) {
-        if (user.role === 3) {
-          if (
-            confirmUserCreated(
-              user._id.toString(),
-              movieFilter[0].authorCreated.toString(),
-            )
-          ) {
-            await idPrams.validateAsync({ id });
-            await this.movieService.deleteMovie(id);
-            return res.status(200).json(JsonResponse(false, 'deleted'));
-          }
-          return res.status(403).json(JsonResponse(false, 'forbidden'));
-        }
-        await idPrams.validateAsync({ id });
-        await this.movieService.deleteMovie(id);
-        return res.status(200).json(JsonResponse(false, 'deleted'));
-      }
-      return res.status(404).json(JsonResponse(false, 'not found'));
-    } catch (e) {
-      if (e.isJoi) {
-        return res.status(422).json(JsonResponse(true, e.message));
-      }
-      return res.status(500).json(JsonResponse(true, e.message));
-    }
-  }
+  // @ApiBearerAuth('auth')
+  // @ApiParam({ name: 'id', type: 'string' })
+  // @UseGuards(AuthGuard('auth'))
+  // @Delete('movie/do=delete/:id')
+  // async deleteMovie(@Req() req: Request, @Res() res: Response) {
+  //   try {
+  //     const user: UserDocument = (req as IResponse).user;
+  //     const { id } = req.params;
+  //     const movieFilter: MovieDocument[] = await this.movieService.filterMovie({
+  //       _id: id,
+  //     });
+  //     if (movieFilter.length > 0) {
+  //       if (user.role === 3) {
+  //         if (
+  //           confirmUserCreated(
+  //             user._id.toString(),
+  //             movieFilter[0].authorCreated.toString(),
+  //           )
+  //         ) {
+  //           await idPrams.validateAsync({ id });
+  //           await this.movieService.deleteMovie(id);
+  //           return res.status(200).json(JsonResponse(false, 'deleted'));
+  //         }
+  //         return res.status(403).json(JsonResponse(false, 'forbidden'));
+  //       }
+  //       await idPrams.validateAsync({ id });
+  //       await this.movieService.deleteMovie(id);
+  //       return res.status(200).json(JsonResponse(false, 'deleted'));
+  //     }
+  //     return res.status(404).json(JsonResponse(false, 'not found'));
+  //   } catch (e) {
+  //     if (e.isJoi) {
+  //       return res.status(422).json(JsonResponse(true, e.message));
+  //     }
+  //     return res.status(500).json(JsonResponse(true, e.message));
+  //   }
+  // }
 }

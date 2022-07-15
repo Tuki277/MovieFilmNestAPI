@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import {
   CategoryMovie,
   CategoryMovieDocument,
@@ -7,54 +6,30 @@ import {
 import {
   DocumentDefinition,
   FilterQuery,
-  Model,
   QueryOptions,
   UpdateQuery,
 } from 'mongoose';
-import { MovieService } from '../movie/movie.service';
+import { CategoryMovieRepository } from './categorymovie.repository';
 
 @Injectable()
 export class CategorymovieService {
-  constructor(
-    @InjectModel(CategoryMovie.name)
-    private categoryModel: Model<CategoryMovieDocument>,
-    private movieService: MovieService,
-  ) {}
+  constructor(private categoryMovieRepository: CategoryMovieRepository) {}
 
-  async createCategory(
+  createCategory(
     input: DocumentDefinition<CategoryMovieDocument>,
   ): Promise<CategoryMovie> {
-    try {
-      return await this.categoryModel.create(input);
-    } catch (e) {
-      throw new Error(e);
-    }
+    return this.categoryMovieRepository.createCategory(input);
   }
 
   async getAllCategory(): Promise<CategoryMovie[]> {
-    return this.categoryModel.aggregate([
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'userCreated',
-          foreignField: '_id',
-          as: 'authors',
-        },
-      },
-      {
-        $project: {
-          'authors.fullname': 1,
-          title: 1,
-        },
-      },
-    ]);
+    return this.categoryMovieRepository.getAllCategory();
   }
 
   async filterCategory(
     query: FilterQuery<CategoryMovieDocument>,
     options: QueryOptions = { learn: true },
   ): Promise<CategoryMovie> {
-    return this.categoryModel.findOne(query, {}, options);
+    return this.categoryMovieRepository.filterCategory(query, options);
   }
 
   async updateCategory(
@@ -62,14 +37,14 @@ export class CategorymovieService {
     update: UpdateQuery<CategoryMovieDocument>,
     options: QueryOptions,
   ): Promise<CategoryMovie> {
-    return this.categoryModel.findOneAndUpdate(query, update, options);
+    return this.categoryMovieRepository.updateCategory(query, update, options);
   }
 
-  async deleteCategory(id: string) {
-    const dataResult = await this.categoryModel.findById(id);
-    dataResult.movie.forEach((x) => {
-      this.movieService.deleteMovie(x.toString());
-    });
-    return this.categoryModel.findByIdAndDelete(id);
-  }
+  // async deleteCategory(id: string) {
+  //   const dataResult = await this.categoryMovieRepository.findById(id);
+  //   dataResult.movie.forEach((x) => {
+  //     this.movieService.deleteMovie(x.toString());
+  //   });
+  //   return this.categoryModel.findByIdAndDelete(id);
+  // }
 }

@@ -29,7 +29,7 @@ export class UserController {
   @Get('user/do=all')
   async getAllUser(@Req() req: Request, @Res() res: Response) {
     try {
-      const data: User[] = await this.userService.getAllUser(
+      const data = await this.userService.getAllUser(
         (req as ReqUser).user.role,
       );
       return res.status(200).json(JsonResponse(false, 'query success', data));
@@ -93,33 +93,13 @@ export class UserController {
       const id: string = req.params.id;
       const body: UserDocument = req.body;
 
-      const dataResult: User = await this.userService.filterUser({ _id: id });
-
+      const dataResult = await this.userService.updateUser({ _id: id }, body);
       if (dataResult) {
-        if (body.username !== '') {
-          const password = await hashPassword(req.body.password);
-          const dataUpdateBody = {
-            ...body,
-            password,
-          };
-          const dataUpdate = await this.userService.updateUser(
-            { _id: id },
-            dataUpdateBody,
-            {
-              new: true,
-            },
-          );
-          return res
-            .status(200)
-            .json(JsonResponse(false, 'updated', dataUpdate));
-        } else {
-          return res
-            .status(422)
-            .json(JsonResponse(false, 'field username is not update'));
-        }
+        return res.status(200).json(JsonResponse(false, 'updated'));
+      } else if (dataResult === 0) {
+        return res.status(200).json(JsonResponse(false, 'not found'));
       }
-
-      return res.status(200).json(JsonResponse(false, 'not found'));
+      return res.status(200).json(JsonResponse(false, 'update fail'));
     } catch (e) {
       return res.status(500).json(JsonResponse(false, e.messages));
     }
