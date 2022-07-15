@@ -21,7 +21,6 @@ export class AuthService {
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
     private jwtService: JwtService,
-    private userService: UserService,
   ) {}
 
   async validatePassword(candidatePassword: string, users: UserDocument) {

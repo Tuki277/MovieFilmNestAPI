@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { DocumentDefinition, FilterQuery } from 'mongoose';
 import { Movie, MovieDocument } from './schema/movie.schema';
 import { MovieRepository } from './movie.repository';
-import { UserDocument } from 'src/user/schemas/user.schema';
 
 @Injectable()
 export class MovieService {

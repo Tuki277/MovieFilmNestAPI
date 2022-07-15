@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  DocumentDefinition,
-  FilterQuery,
-  QueryOptions,
-  UpdateQuery,
-} from 'mongoose';
+import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose';
 import { hashPassword } from 'src/helpers';
 import { User, UserDocument } from './schemas/user.schema';
 import { UserRepository } from './user.repository';
@@ -13,9 +8,27 @@ import { UserRepository } from './user.repository';
 export class UserService {
   constructor(private userRepository: UserRepository) {}
 
-  async createUser(input: DocumentDefinition<UserDocument>): Promise<User> {
+  async createUser(reqBody: User): Promise<User> {
     try {
-      return await this.userRepository.createUser(input);
+      const passwordHash = await hashPassword(reqBody.password);
+      return await this.userRepository.createUser({
+        ...reqBody,
+        password: passwordHash,
+      });
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async checkUsernameDuplicated(reqBody: User): Promise<boolean> {
+    try {
+      const dataResult = await this.userRepository.filterUser({
+        username: reqBody.username,
+      });
+      if (!dataResult) {
+        return true;
+      }
+      return false;
     } catch (error) {
       throw new Error(error);
     }

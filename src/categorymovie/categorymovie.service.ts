@@ -10,10 +10,14 @@ import {
   UpdateQuery,
 } from 'mongoose';
 import { CategoryMovieRepository } from './categorymovie.repository';
+import { MovieService } from 'src/movie/movie.service';
 
 @Injectable()
 export class CategorymovieService {
-  constructor(private categoryMovieRepository: CategoryMovieRepository) {}
+  constructor(
+    private categoryMovieRepository: CategoryMovieRepository,
+    private movieService: MovieService,
+  ) {}
 
   createCategory(
     input: DocumentDefinition<CategoryMovieDocument>,
@@ -40,11 +44,7 @@ export class CategorymovieService {
     return this.categoryMovieRepository.updateCategory(query, update, options);
   }
 
-  // async deleteCategory(id: string) {
-  //   const dataResult = await this.categoryMovieRepository.findById(id);
-  //   dataResult.movie.forEach((x) => {
-  //     this.movieService.deleteMovie(x.toString());
-  //   });
-  //   return this.categoryModel.findByIdAndDelete(id);
-  // }
+  async deleteCategory(id: string) {
+    return this.categoryMovieRepository.deleteCategory(id);
+  }
 }

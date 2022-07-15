@@ -45,6 +45,7 @@ export class CategoryMovieRepository {
         $project: {
           'authors.fullname': 1,
           title: 1,
+          movie: 1,
         },
       },
     ]);
@@ -65,13 +66,13 @@ export class CategoryMovieRepository {
     return this.categoryModel.findOneAndUpdate(query, update, options);
   }
 
-  // async deleteCategory(id: string) {
-  //   const dataResult = await this.categoryModel.findById(id);
-  //   dataResult.movie.forEach((x) => {
-  //     this.movieService.deleteMovie(x.toString());
-  //   });
-  //   return this.categoryModel.findByIdAndDelete(id);
-  // }
+  async deleteCategory(id: string) {
+    const dataResult = await this.categoryModel.findById(id);
+    dataResult.movie.forEach((x) => {
+      this.movieService.deleteMovie(x.toString());
+    });
+    return this.categoryModel.findByIdAndDelete(id);
+  }
 
   async findById(id: string) {
     return this.categoryModel.findById(id);
