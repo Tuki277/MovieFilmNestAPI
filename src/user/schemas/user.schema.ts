@@ -35,6 +35,12 @@ export class User {
     { default: [] },
   ])
   movie: Movie[];
+
+  @Prop([
+    { type: mongoose.Schema.Types.ObjectId, ref: 'movie' },
+    { default: [] },
+  ])
+  movieBuy: Movie[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -40,6 +40,9 @@ export class Movie {
 
   @Prop({ required: true })
   fileName: string;
+
+  @Prop({ default: 0 })
+  price: number;
 }
 
 export const MovieSchema = SchemaFactory.createForClass(Movie);

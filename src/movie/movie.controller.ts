@@ -29,6 +29,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { MovieSwagger } from '../swagger';
+import { Stripe } from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2020-08-27',
+});
 
 export interface IResponse extends Request {
   file: any;
@@ -90,6 +95,75 @@ export class MovieController {
     });
   }
 
+  @UseGuards(AuthGuard('auth'))
+  @Post('movie/do=buy')
+  async buyMovie(@Req() req: Request, @Res() res: Response) {
+    try {
+      const { email, amount, currency, movieId } = req.body;
+      const customer = await stripe.customers.list({
+        email,
+      });
+      if (customer.data.length > 0) {
+        const cusId = customer.data[0].id;
+        const charge = await stripe.charges.create({
+          customer: cusId,
+          currency,
+          amount,
+        });
+        if (charge.status === 'succeeded') {
+          const userId = (req as IResponse).user._id;
+          const user: User = await this.userService.filterUser({ _id: userId });
+          const findIdMovie: MovieDocument[] =
+            await this.movieService.filterMovie({
+              _id: movieId,
+            });
+          if (findIdMovie.length > 0) {
+            user.movieBuy.push(findIdMovie[0]._id);
+            await this.userService.updateUser({ _id: userId }, user, {
+              new: true,
+            });
+            return res.status(200).json(JsonResponse(false, 'buy success'));
+          }
+          return res.status(404).json(JsonResponse(false, 'not found'));
+        }
+        return res.status(500).json(JsonResponse(false, 'pay fail'));
+      }
+      return res.status(404).json(JsonResponse(false, 'not found'));
+    } catch (error) {
+      return res.status(500).json(JsonResponse(true, error.message));
+    }
+  }
+
+  @Get('movie/do=detail/:id')
+  async getMovieById(@Req() req: Request, @Res() res: Response) {
+    const { id } = req.params;
+    const movie = await this.movieService.filterMovie({
+      _id: id,
+    });
+    if (movie.length > 0) {
+      const idUser = (req as IResponse).user;
+      const userFind: UserDocument = await this.userService.filterUser({
+        _id: idUser,
+      });
+      const found = userFind.movieBuy.find((x) => x.toString() == id);
+      if (found !== undefined) {
+        return res.status(200).json(
+          JsonResponse(false, 'query success', {
+            ...movie,
+            watch: true,
+          }),
+        );
+      }
+      return res.status(200).json(
+        JsonResponse(false, 'query success', {
+          ...movie,
+          watch: false,
+        }),
+      );
+    }
+    return res.status(404).json(JsonResponse(false, 'not found'));
+  }
+
   @Post('movie/do=search')
   async filterMovie(@Req() req: Request, @Res() res: Response) {
     const { text } = req.body;
@@ -99,8 +173,6 @@ export class MovieController {
     return res.status(200).json(JsonResponse(false, 'query success', movie));
   }
 
-  // @UseGuards(AuthGuard('google'))
-  // @UseGuards(AuthGuard('auth'))
   @Get('movie/do=all')
   async getAllMovieList(@Req() req: Request, @Res() res: Response) {
     try {
