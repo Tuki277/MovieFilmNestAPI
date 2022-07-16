@@ -34,7 +34,12 @@ export class AppModule implements NestModule {
       .forRoutes({ path: '/api/*', method: RequestMethod.ALL });
     consumer
       .apply(AuthRoleMiddleware)
-      .forRoutes(UserController, CategorymovieController);
+      .exclude({ path: '/api/categories/do=all', method: RequestMethod.GET })
+      .forRoutes(CategorymovieController);
+    consumer
+      .apply(AuthRoleMiddleware)
+      .exclude({ path: '/api/user/do=current-user', method: RequestMethod.GET })
+      .forRoutes(UserController);
     consumer
       .apply(AuthRoleMiddleware)
       .forRoutes({ path: '/api/movie', method: RequestMethod.GET });

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CategoryMovieRepository } from 'src/categorymovie/categorymovie.repository';
+import { UserRepository } from 'src/user/user.repository';
 import { CategorymovieService } from '../categorymovie/categorymovie.service';
 import {
   CategoriesMovieSchema,
@@ -17,17 +18,18 @@ import { Movie, MovieSchema } from './schema/movie.schema';
   imports: [
     MongooseModule.forFeature([
       { name: Movie.name, schema: MovieSchema },
-      { name: CategoryMovie.name, schema: CategoriesMovieSchema },
       { name: User.name, schema: UserSchema },
+      { name: CategoryMovie.name, schema: CategoriesMovieSchema },
     ]),
   ],
   controllers: [MovieController],
   providers: [
-    MovieService,
-    CategorymovieService,
     CategoryMovieRepository,
+    CategorymovieService,
     MovieRepository,
-    // UserService
+    MovieService,
+    UserService,
+    UserRepository,
   ],
   exports: [MovieService],
 })

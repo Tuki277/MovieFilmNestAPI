@@ -1,5 +1,4 @@
 import * as bcrypt from 'bcrypt';
-import { idPrams } from 'src/movie/schema/movie.validate';
 
 export const hashPassword = async (password: string) => {
   try {

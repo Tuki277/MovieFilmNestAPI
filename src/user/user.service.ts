@@ -35,40 +35,54 @@ export class UserService {
   }
 
   async getAllUser(role: number): Promise<User[]> {
-    return await this.userRepository.getAllUser(role);
+    try {
+      return await this.userRepository.getAllUser(role);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async deleteUser(id: string): Promise<User> {
-    return this.userRepository.deleteUser(id);
+    try {
+      return await this.userRepository.deleteUser(id);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async filterUser(
     query: FilterQuery<UserDocument>,
     options: QueryOptions = { lean: true },
   ) {
-    return this.userRepository.filterUser(query, options);
+    try {
+      return await this.userRepository.filterUser(query, options);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async updateUser(
     query: FilterQuery<UserDocument>,
     update: UpdateQuery<UserDocument>,
   ) {
-    const dataResult: User = await this.userRepository.filterUser(query);
-    if (dataResult) {
-      if (update.username !== '') {
-        const password = await hashPassword(update.password);
-        const dataUpdateBody = {
-          ...update,
-          password,
-        };
-        await this.userRepository.updateUser(query, dataUpdateBody, {
-          new: true,
-        });
-        return true;
-      } else {
-        return false;
+    try {
+      const dataResult: User = await this.userRepository.filterUser(query);
+      if (dataResult) {
+        if (update.username !== '') {
+          const password = await hashPassword(update.password);
+          const dataUpdateBody = {
+            ...update,
+            password,
+          };
+          return await this.userRepository.updateUser(query, dataUpdateBody, {
+            new: true,
+          });
+        }
+        throw new Error('username is not edit');
       }
+      throw new Error('not found');
+    } catch (error) {
+      throw new Error(error);
     }
-    return 0;
   }
 }

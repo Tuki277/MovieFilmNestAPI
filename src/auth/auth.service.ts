@@ -8,7 +8,6 @@ import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
 
 export interface IGoogleOauth {
   sub: string;

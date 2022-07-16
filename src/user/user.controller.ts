@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Request, Response } from 'express';
-import { hashPassword, JsonResponse } from '../helpers';
+import { JsonResponse } from '../helpers';
 import { AuthGuard } from '@nestjs/passport';
 import { User, UserDocument } from './schemas/user.schema';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
@@ -40,7 +40,7 @@ export class UserController {
 
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
-  @Get('user/current-user')
+  @Get('user/do=current-user')
   async getCurrentUser(@Req() req: Request, @Res() res: Response) {
     try {
       const user: UserDocument = (req as ReqUser).user;
@@ -93,15 +93,10 @@ export class UserController {
       const id: string = req.params.id;
       const body: UserDocument = req.body;
 
-      const dataResult = await this.userService.updateUser({ _id: id }, body);
-      if (dataResult) {
-        return res.status(200).json(JsonResponse(false, 'updated'));
-      } else if (dataResult === 0) {
-        return res.status(200).json(JsonResponse(false, 'not found'));
-      }
-      return res.status(200).json(JsonResponse(false, 'update fail'));
+      await this.userService.updateUser({ _id: id }, body);
+      return res.status(200).json(JsonResponse(false, 'updated'));
     } catch (e) {
-      return res.status(500).json(JsonResponse(false, e.messages));
+      return res.status(500).json(JsonResponse(false, e.message));
     }
   }
 }

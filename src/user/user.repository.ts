@@ -14,43 +14,59 @@ export class UserRepository {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async createUser(input: DocumentDefinition<UserDocument>): Promise<User> {
-    return await this.userModel.create(input);
+    try {
+      return await this.userModel.create(input);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async getAllUser(role: number): Promise<User[]> {
-    return await this.userModel.aggregate([
-      { $match: { role: { $gte: role } } },
-      {
-        $project: {
-          username: 1,
-          fullname: 1,
-          age: 1,
-          address: 1,
-          movieView: 1,
-          movie: 1,
-          role: 1,
-          createdAt: 1,
-          movieUpload: {
-            $cond: {
-              if: { $isArray: '$movie' },
-              then: { $size: '$movie' },
-              else: 0,
+    try {
+      return await this.userModel.aggregate([
+        { $match: { role: { $gte: role } } },
+        {
+          $project: {
+            username: 1,
+            fullname: 1,
+            age: 1,
+            address: 1,
+            movieView: 1,
+            movie: 1,
+            role: 1,
+            createdAt: 1,
+            movieUpload: {
+              $cond: {
+                if: { $isArray: '$movie' },
+                then: { $size: '$movie' },
+                else: 0,
+              },
             },
           },
         },
-      },
-    ]);
+      ]);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async deleteUser(id: string): Promise<User> {
-    return this.userModel.findByIdAndDelete(id);
+    try {
+      return await this.userModel.findByIdAndDelete(id);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async filterUser(
     query: FilterQuery<UserDocument>,
     options: QueryOptions = { lean: true },
   ) {
-    return this.userModel.findOne(query, {}, options);
+    try {
+      return await this.userModel.findOne(query, {}, options);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async updateUser(
@@ -58,6 +74,10 @@ export class UserRepository {
     update: UpdateQuery<UserDocument>,
     options: QueryOptions,
   ): Promise<User> {
-    return this.userModel.findOneAndUpdate(query, update, options);
+    try {
+      return await this.userModel.findOneAndUpdate(query, update, options);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 }

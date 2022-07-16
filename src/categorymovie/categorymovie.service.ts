@@ -10,30 +10,38 @@ import {
   UpdateQuery,
 } from 'mongoose';
 import { CategoryMovieRepository } from './categorymovie.repository';
-import { MovieService } from 'src/movie/movie.service';
 
 @Injectable()
 export class CategorymovieService {
-  constructor(
-    private categoryMovieRepository: CategoryMovieRepository,
-    private movieService: MovieService,
-  ) {}
+  constructor(private categoryMovieRepository: CategoryMovieRepository) {}
 
-  createCategory(
+  async createCategory(
     input: DocumentDefinition<CategoryMovieDocument>,
   ): Promise<CategoryMovie> {
-    return this.categoryMovieRepository.createCategory(input);
+    try {
+      return await this.categoryMovieRepository.createCategory(input);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async getAllCategory(): Promise<CategoryMovie[]> {
-    return this.categoryMovieRepository.getAllCategory();
+    try {
+      return await this.categoryMovieRepository.getAllCategory();
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async filterCategory(
     query: FilterQuery<CategoryMovieDocument>,
     options: QueryOptions = { learn: true },
   ): Promise<CategoryMovie> {
-    return this.categoryMovieRepository.filterCategory(query, options);
+    try {
+      return await this.categoryMovieRepository.filterCategory(query, options);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async updateCategory(
@@ -41,10 +49,22 @@ export class CategorymovieService {
     update: UpdateQuery<CategoryMovieDocument>,
     options: QueryOptions,
   ): Promise<CategoryMovie> {
-    return this.categoryMovieRepository.updateCategory(query, update, options);
+    try {
+      return await this.categoryMovieRepository.updateCategory(
+        query,
+        update,
+        options,
+      );
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async deleteCategory(id: string) {
-    return this.categoryMovieRepository.deleteCategory(id);
+    try {
+      return await this.categoryMovieRepository.deleteCategory(id);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 }

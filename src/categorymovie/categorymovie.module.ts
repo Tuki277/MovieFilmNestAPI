@@ -11,6 +11,8 @@ import {
 } from './schema/categorymovie.schema';
 import { CategoryMovieRepository } from './categorymovie.repository';
 import { MovieRepository } from 'src/movie/movie.repository';
+import { UserService } from 'src/user/user.service';
+import { UserRepository } from 'src/user/user.repository';
 
 @Module({
   imports: [
@@ -22,10 +24,12 @@ import { MovieRepository } from 'src/movie/movie.repository';
   ],
   controllers: [CategorymovieController],
   providers: [
-    CategorymovieService,
-    MovieService,
     CategoryMovieRepository,
+    CategorymovieService,
     MovieRepository,
+    MovieService,
+    UserService,
+    UserRepository,
   ],
   exports: [CategorymovieService],
 })

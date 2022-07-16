@@ -26,36 +26,44 @@ export class CategoryMovieRepository {
   ): Promise<CategoryMovie> {
     try {
       return await this.categoryModel.create(input);
-    } catch (e) {
-      throw new Error(e);
+    } catch (error) {
+      throw new Error(error);
     }
   }
 
   async getAllCategory(): Promise<CategoryMovie[]> {
-    return this.categoryModel.aggregate([
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'userCreated',
-          foreignField: '_id',
-          as: 'authors',
+    try {
+      return await this.categoryModel.aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userCreated',
+            foreignField: '_id',
+            as: 'authors',
+          },
         },
-      },
-      {
-        $project: {
-          'authors.fullname': 1,
-          title: 1,
-          movie: 1,
+        {
+          $project: {
+            'authors.fullname': 1,
+            title: 1,
+            movie: 1,
+          },
         },
-      },
-    ]);
+      ]);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async filterCategory(
     query: FilterQuery<CategoryMovieDocument>,
     options: QueryOptions = { learn: true },
   ): Promise<CategoryMovie> {
-    return this.categoryModel.findOne(query, {}, options);
+    try {
+      return await this.categoryModel.findOne(query, {}, options);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async updateCategory(
@@ -63,7 +71,11 @@ export class CategoryMovieRepository {
     update: UpdateQuery<CategoryMovieDocument>,
     options: QueryOptions,
   ): Promise<CategoryMovie> {
-    return this.categoryModel.findOneAndUpdate(query, update, options);
+    try {
+      return await this.categoryModel.findOneAndUpdate(query, update, options);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async deleteCategory(id: string) {
@@ -75,6 +87,10 @@ export class CategoryMovieRepository {
   }
 
   async findById(id: string) {
-    return this.categoryModel.findById(id);
+    try {
+      return this.categoryModel.findById(id);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 }
