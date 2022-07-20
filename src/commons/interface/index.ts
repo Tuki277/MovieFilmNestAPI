@@ -23,3 +23,9 @@ export interface IPaging {
   page: number;
   rowPerPage: number;
 }
+
+export interface ILevel {
+  ERROR: 'error';
+  INFO: 'info';
+  WARNING: 'warn';
+}

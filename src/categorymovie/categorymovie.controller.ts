@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Res,
   Req,
   UseGuards,
@@ -19,7 +18,9 @@ import {
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CategorySwagger, Paging } from 'src/swagger';
 import { Responses } from 'src/commons/response';
-import { DoCode } from 'src/commons/consts/response.const';
+import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
+import { log } from 'src/commons/logger';
+import { LevelLogger } from 'src/commons/consts/loger.const';
 
 @ApiTags('category')
 @Controller('api')
@@ -35,7 +36,7 @@ export class CategorymovieController extends Responses {
       const data: CategoryMovie[] = await this.categoryService.getAllCategory(
         req.body,
       );
-      console.log(process.env.NODE_ENV);
+      log(req, ResponseMessage.QUERY_SUCCESS, LevelLogger.INFO);
       return this.responseJson(res, DoCode.GET, data);
     } catch (error) {
       return this.error(res, error);

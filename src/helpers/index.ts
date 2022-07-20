@@ -31,10 +31,10 @@ export const JsonResponse = (
 export const getDateTimeNow = () => {
   const today = new Date();
   const date =
-    today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+    today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate();
   const time =
     today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
-  return `${date}_${time}`;
+  return `${date} - ${time}`;
 };
 
 export const confirmUserCreated = (idUser: string, idPrams: string) => {
