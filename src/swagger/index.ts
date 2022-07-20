@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { binary } from 'joi';
 
 export class Login {
   @ApiProperty({ required: true })
@@ -12,14 +11,6 @@ export class Login {
 export class RefreshToken {
   @ApiProperty({ required: true })
   refreshToken: string;
-}
-
-export class Paging {
-  @ApiProperty({ required: true })
-  skip: number;
-
-  @ApiProperty({ required: true })
-  limit: number;
 }
 
 export class UserSwagger {
@@ -60,4 +51,31 @@ export class MovieSwagger {
 export class CategorySwagger {
   @ApiProperty({ required: true })
   title: string;
+}
+
+export class Paging {
+  @ApiProperty()
+  page: number;
+
+  @ApiProperty()
+  rowPerPage: number;
+}
+
+export class BuyMovie {
+  @ApiProperty()
+  email: string;
+
+  @ApiProperty()
+  amount: string;
+
+  @ApiProperty()
+  currency: string;
+
+  @ApiProperty()
+  movieId: string;
+}
+
+export class SearchMovie {
+  @ApiProperty()
+  text: string;
 }

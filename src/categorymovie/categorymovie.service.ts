@@ -10,10 +10,13 @@ import {
   UpdateQuery,
 } from 'mongoose';
 import { CategoryMovieRepository } from './categorymovie.repository';
+import { ErrorResponse } from 'src/commons/response/error';
 
 @Injectable()
-export class CategorymovieService {
-  constructor(private categoryMovieRepository: CategoryMovieRepository) {}
+export class CategorymovieService extends ErrorResponse {
+  constructor(private categoryMovieRepository: CategoryMovieRepository) {
+    super();
+  }
 
   async createCategory(
     input: DocumentDefinition<CategoryMovieDocument>,
@@ -21,15 +24,15 @@ export class CategorymovieService {
     try {
       return await this.categoryMovieRepository.createCategory(input);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
-  async getAllCategory(): Promise<CategoryMovie[]> {
+  async getAllCategory(reqBody): Promise<CategoryMovie[]> {
     try {
-      return await this.categoryMovieRepository.getAllCategory();
+      return await this.categoryMovieRepository.getAllCategory(reqBody);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -40,7 +43,7 @@ export class CategorymovieService {
     try {
       return await this.categoryMovieRepository.filterCategory(query, options);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -56,7 +59,7 @@ export class CategorymovieService {
         options,
       );
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -64,7 +67,7 @@ export class CategorymovieService {
     try {
       return await this.categoryMovieRepository.deleteCategory(id);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 }

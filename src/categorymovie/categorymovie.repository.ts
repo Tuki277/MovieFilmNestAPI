@@ -12,14 +12,17 @@ import {
   UpdateQuery,
 } from 'mongoose';
 import { MovieService } from '../movie/movie.service';
+import { ErrorResponse } from 'src/commons/response/error';
 
 @Injectable()
-export class CategoryMovieRepository {
+export class CategoryMovieRepository extends ErrorResponse {
   constructor(
     @InjectModel(CategoryMovie.name)
     private categoryModel: Model<CategoryMovieDocument>,
     private movieService: MovieService,
-  ) {}
+  ) {
+    super();
+  }
 
   async createCategory(
     input: DocumentDefinition<CategoryMovieDocument>,
@@ -27,11 +30,14 @@ export class CategoryMovieRepository {
     try {
       return await this.categoryModel.create(input);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
-  async getAllCategory(): Promise<CategoryMovie[]> {
+  async getAllCategory(reqBody: {
+    page: number;
+    rowPerPage: number;
+  }): Promise<CategoryMovie[]> {
     try {
       return await this.categoryModel.aggregate([
         {
@@ -49,9 +55,15 @@ export class CategoryMovieRepository {
             movie: 1,
           },
         },
+        {
+          $skip: reqBody.page
+            ? reqBody.page * reqBody.rowPerPage - reqBody.rowPerPage
+            : 0,
+        },
+        { $limit: reqBody.rowPerPage ? reqBody.rowPerPage : 100 },
       ]);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -62,7 +74,7 @@ export class CategoryMovieRepository {
     try {
       return await this.categoryModel.findOne(query, {}, options);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -74,7 +86,7 @@ export class CategoryMovieRepository {
     try {
       return await this.categoryModel.findOneAndUpdate(query, update, options);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -90,7 +102,7 @@ export class CategoryMovieRepository {
     try {
       return this.categoryModel.findById(id);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 }

@@ -25,7 +25,9 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { MovieSwagger } from '../swagger';
+import { BuyMovie, MovieSwagger, Paging, SearchMovie } from '../swagger';
+import { Responses } from 'src/commons/response';
+import { DoCode } from 'src/commons/consts/response.const';
 
 export interface IResponse extends Request {
   file: any;
@@ -34,8 +36,10 @@ export interface IResponse extends Request {
 
 @ApiTags('movie')
 @Controller('api')
-export class MovieController {
-  constructor(private movieService: MovieService) {}
+export class MovieController extends Responses {
+  constructor(private movieService: MovieService) {
+    super();
+  }
 
   @ApiParam({ name: 'id', type: 'string' })
   @Get('video/:id')
@@ -68,14 +72,15 @@ export class MovieController {
   }
 
   @UseGuards(AuthGuard('auth'))
+  @ApiBody({ type: BuyMovie })
   @Post('movie/do=buy')
   async buyMovie(@Req() req: Request, @Res() res: Response) {
     try {
       const userId = (req as IResponse).user._id;
       await this.movieService.buyMovie(req.body, userId);
-      return res.status(200).json(JsonResponse(false, 'buy success'));
+      return this.responseJson(res, DoCode.BUY);
     } catch (error) {
-      return res.status(500).json(JsonResponse(true, error.message));
+      return this.error(res, error);
     }
   }
 
@@ -85,29 +90,27 @@ export class MovieController {
       const { id } = req.params;
       const idUser = (req as IResponse).user;
       const movie = await this.movieService.getDetailMovie(id, idUser);
-      return res.status(200).json(JsonResponse(false, 'query success', movie));
+      return this.responseJson(res, DoCode.GET, movie);
     } catch (error) {
-      return res.status(500).json(JsonResponse(false, error.message));
+      return this.error(res, error);
     }
   }
 
   @Post('movie/do=search')
+  @ApiBody({ type: SearchMovie })
   async filterMovie(@Req() req: Request, @Res() res: Response) {
     const movieResult = await this.movieService.searchMovie(req.body);
-    return res
-      .status(200)
-      .json(JsonResponse(false, 'query success', movieResult));
+    return this.responseJson(res, DoCode.GET, movieResult);
   }
 
-  @Get('movie/do=all')
+  @ApiBody({ type: Paging })
+  @Post('movie/do=all')
   async getAllMovieList(@Req() req: Request, @Res() res: Response) {
     try {
-      const dataResult = await this.movieService.getMovie();
-      return res
-        .status(200)
-        .json(JsonResponse(false, 'query success', dataResult));
+      const dataResult = await this.movieService.getMovie(req.body);
+      return this.responseJson(res, DoCode.GET, dataResult);
     } catch (error) {
-      return res.status(500).json(JsonResponse(true, error.message));
+      this.error(res, error);
     }
   }
 
@@ -120,12 +123,9 @@ export class MovieController {
       const data: Movie[] = await this.movieService.filterMovie({
         authorCreated: userId._id,
       });
-      return res.status(200).json(JsonResponse(false, 'query success', data));
+      return this.responseJson(res, DoCode.GET, data);
     } catch (error) {
-      if (error.isJoi) {
-        return res.status(422).json(JsonResponse(true, error.message));
-      }
-      return res.status(500).json(JsonResponse(true, error.message));
+      return this.error(res, error);
     }
   }
 
@@ -161,12 +161,9 @@ export class MovieController {
         reqFile,
         categoryId,
       );
-      return res.status(200).json(JsonResponse(false, 'created', dataAdd));
+      return this.responseJson(res, DoCode.CREATE, dataAdd);
     } catch (error) {
-      if (error.isJoi) {
-        return res.status(422).json(JsonResponse(true, error.message));
-      }
-      return res.status(500).json(JsonResponse(true, error.message));
+      return this.error(res, error);
     }
   }
 
@@ -180,12 +177,9 @@ export class MovieController {
       const { id } = req.params;
       await idPrams.validateAsync({ id });
       await this.movieService.deleteMovieService(id, user);
-      return res.status(200).json(JsonResponse(false, 'deleted'));
-    } catch (e) {
-      if (e.isJoi) {
-        return res.status(422).json(JsonResponse(true, e.message));
-      }
-      return res.status(500).json(JsonResponse(true, e.message));
+      return this.responseJson(res, DoCode.DELETE);
+    } catch (error) {
+      return this.error(res, error);
     }
   }
 }

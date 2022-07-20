@@ -9,11 +9,12 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Request, Response } from 'express';
-import { JsonResponse } from '../helpers';
 import { AuthGuard } from '@nestjs/passport';
 import { User, UserDocument } from './schemas/user.schema';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UserSwagger } from '../swagger';
+import { Responses } from 'src/commons/response';
+import { DoCode } from 'src/commons/consts/response.const';
 
 export interface ReqUser extends Request {
   user: any;
@@ -21,8 +22,10 @@ export interface ReqUser extends Request {
 
 @ApiTags('user')
 @Controller('api')
-export class UserController {
-  constructor(private userService: UserService) {}
+export class UserController extends Responses {
+  constructor(private userService: UserService) {
+    super();
+  }
 
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
@@ -32,9 +35,9 @@ export class UserController {
       const data = await this.userService.getAllUser(
         (req as ReqUser).user.role,
       );
-      return res.status(200).json(JsonResponse(false, 'query success', data));
-    } catch (e) {
-      return res.status(500).json(JsonResponse(true, e.messages));
+      return this.responseJson(res, DoCode.GET, data);
+    } catch (error) {
+      return this.error(res, error);
     }
   }
 
@@ -45,24 +48,20 @@ export class UserController {
     try {
       const user: UserDocument = (req as ReqUser).user;
       if (user.role === 1 || user.role === 2) {
-        return res.status(200).json(
-          JsonResponse(false, 'query success', {
-            ...user,
-            movieUpload: user.movie.length,
-            permission: true,
-          }),
-        );
+        return this.responseJson(res, DoCode.GET, {
+          ...user,
+          movieUpload: user.movie.length,
+          permission: true,
+        });
       } else {
-        return res.status(200).json(
-          JsonResponse(false, 'query success', {
-            ...user,
-            movieUpload: user.movie.length,
-            permission: true,
-          }),
-        );
+        return this.responseJson(res, DoCode.GET, {
+          ...user,
+          movieUpload: user.movie.length,
+          permission: true,
+        });
       }
-    } catch (e) {
-      return res.status(500).json(JsonResponse(true, e.messages));
+    } catch (error) {
+      return this.error(res, error);
     }
   }
 
@@ -75,11 +74,11 @@ export class UserController {
       const id: string = req.params.id;
       const dataResult: User = await this.userService.deleteUser(id);
       if (dataResult) {
-        return res.status(200).json(JsonResponse(false, 'deleted'));
+        return this.responseJson(res, DoCode.DELETE);
       }
-      return res.status(200).json(JsonResponse(false, 'not found'));
-    } catch (e) {
-      return res.status(500).json(JsonResponse(true, e.messages));
+      return this.responseJson(res, DoCode.NOT_FOUND);
+    } catch (error) {
+      return this.error(res, error);
     }
   }
 
@@ -94,9 +93,9 @@ export class UserController {
       const body: UserDocument = req.body;
 
       await this.userService.updateUser({ _id: id }, body);
-      return res.status(200).json(JsonResponse(false, 'updated'));
-    } catch (e) {
-      return res.status(500).json(JsonResponse(false, e.message));
+      return this.responseJson(res, DoCode.UPDATE);
+    } catch (error) {
+      return this.error(res, error);
     }
   }
 }

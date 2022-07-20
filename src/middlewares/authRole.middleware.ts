@@ -15,6 +15,7 @@ export class AuthRoleMiddleware implements NestMiddleware {
     if (!userResult) {
       return res.status(404).json(JsonResponse(true, 'not found'));
     } else {
+      console.log(userResult.role);
       if (userResult.role === 1 || userResult.role === 2) {
         next();
         return;

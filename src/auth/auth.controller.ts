@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Response, Request } from 'express';
-import { hashPassword, JsonResponse } from 'src/helpers';
+import { JsonResponse } from 'src/helpers';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { registerSchema, loginSchema } from '../user/schemas/user.vaidate';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Login, RefreshToken, UserSwagger } from 'src/swagger';
-import { User, UserDocument } from 'src/user/schemas/user.schema';
+import { UserDocument } from 'src/user/schemas/user.schema';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
@@ -44,6 +44,7 @@ export class AuthController {
           ...user,
           refreshToken: refreshToken,
         },
+        true,
       );
       const jwt = this.jwtService.sign(payload);
       return res

@@ -12,28 +12,33 @@ import { CategorymovieService } from './categorymovie.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { CategoryMovie } from './schema/categorymovie.schema';
-import { JsonResponse } from 'src/helpers';
 import {
   createCategorySchema,
   paramsId,
 } from './schema/categorymovie.validate';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { CategorySwagger } from 'src/swagger';
+import { CategorySwagger, Paging } from 'src/swagger';
+import { Responses } from 'src/commons/response';
+import { DoCode } from 'src/commons/consts/response.const';
 
 @ApiTags('category')
 @Controller('api')
-export class CategorymovieController {
-  constructor(private categoryService: CategorymovieService) {}
+export class CategorymovieController extends Responses {
+  constructor(private categoryService: CategorymovieService) {
+    super();
+  }
 
-  @ApiBearerAuth('auth')
-  @UseGuards(AuthGuard('auth'))
-  @Get('categories/do=all')
+  @ApiBody({ type: Paging })
+  @Post('categories/do=all')
   async getAllCategories(@Req() req: Request, @Res() res: Response) {
     try {
-      const data: CategoryMovie[] = await this.categoryService.getAllCategory();
-      return res.status(200).json(JsonResponse(false, 'query success', data));
-    } catch (e) {
-      return res.status(500).json(JsonResponse(false, e.message));
+      const data: CategoryMovie[] = await this.categoryService.getAllCategory(
+        req.body,
+      );
+      console.log(process.env.NODE_ENV);
+      return this.responseJson(res, DoCode.GET, data);
+    } catch (error) {
+      return this.error(res, error);
     }
   }
 
@@ -55,12 +60,9 @@ export class CategorymovieController {
         //@ts-ignore
         userCreated: req.user._id.toString(),
       });
-      return res.status(201).json(JsonResponse(false, 'created', category));
-    } catch (e) {
-      if (e.isJoi) {
-        return res.status(422).json(JsonResponse(true, e.message));
-      }
-      return res.status(500).json(JsonResponse(true, e.message));
+      return this.responseJson(res, DoCode.CREATE, category);
+    } catch (error) {
+      return this.error(res, error);
     }
   }
 
@@ -73,12 +75,9 @@ export class CategorymovieController {
       const { id } = req.params;
       await paramsId.validateAsync({ id });
       await this.categoryService.deleteCategory(id);
-      return res.status(200).json(JsonResponse(false, 'deleted'));
-    } catch (e) {
-      if (e.isJoi) {
-        return res.status(422).json(JsonResponse(true, e.message));
-      }
-      return res.status(500).json(JsonResponse(true, e.message));
+      return this.responseJson(res, DoCode.DELETE);
+    } catch (error) {
+      return this.error(res, error);
     }
   }
 
@@ -95,12 +94,9 @@ export class CategorymovieController {
       await this.categoryService.updateCategory({ _id: id }, body, {
         new: true,
       });
-      return res.status(200).json(JsonResponse(false, 'updated'));
-    } catch (e) {
-      if (e.isJoi) {
-        return res.status(422).json(JsonResponse(true, e.message));
-      }
-      return res.status(500).json(JsonResponse(true, e.message));
+      return this.responseJson(res, DoCode.UPDATE);
+    } catch (error) {
+      return this.error(res, error);
     }
   }
 }

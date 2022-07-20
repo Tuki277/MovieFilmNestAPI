@@ -7,17 +7,20 @@ import {
   QueryOptions,
   UpdateQuery,
 } from 'mongoose';
+import { ErrorResponse } from 'src/commons/response/error';
 import { User, UserDocument } from './schemas/user.schema';
 
 @Injectable()
-export class UserRepository {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+export class UserRepository extends ErrorResponse {
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {
+    super();
+  }
 
   async createUser(input: DocumentDefinition<UserDocument>): Promise<User> {
     try {
       return await this.userModel.create(input);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -46,7 +49,7 @@ export class UserRepository {
         },
       ]);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -54,7 +57,7 @@ export class UserRepository {
     try {
       return await this.userModel.findByIdAndDelete(id);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -65,7 +68,7 @@ export class UserRepository {
     try {
       return await this.userModel.findOne(query, {}, options);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -77,7 +80,7 @@ export class UserRepository {
     try {
       return await this.userModel.findOneAndUpdate(query, update, options);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 }

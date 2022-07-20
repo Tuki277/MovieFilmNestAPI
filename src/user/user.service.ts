@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose';
+import { ErrorResponse } from 'src/commons/response/error';
 import { hashPassword } from 'src/helpers';
 import { User, UserDocument } from './schemas/user.schema';
 import { UserRepository } from './user.repository';
 
 @Injectable()
-export class UserService {
-  constructor(private userRepository: UserRepository) {}
+export class UserService extends ErrorResponse {
+  constructor(private userRepository: UserRepository) {
+    super();
+  }
 
   async createUser(reqBody: User): Promise<User> {
     try {
@@ -16,7 +19,7 @@ export class UserService {
         password: passwordHash,
       });
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -30,7 +33,7 @@ export class UserService {
       }
       return false;
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -38,7 +41,7 @@ export class UserService {
     try {
       return await this.userRepository.getAllUser(role);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -46,7 +49,7 @@ export class UserService {
     try {
       return await this.userRepository.deleteUser(id);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -57,32 +60,38 @@ export class UserService {
     try {
       return await this.userRepository.filterUser(query, options);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
   async updateUser(
     query: FilterQuery<UserDocument>,
     update: UpdateQuery<UserDocument>,
+    login?: boolean,
   ) {
     try {
       const dataResult: User = await this.userRepository.filterUser(query);
       if (dataResult) {
         if (update.username !== '') {
-          const password = await hashPassword(update.password);
-          const dataUpdateBody = {
-            ...update,
-            password,
-          };
-          return await this.userRepository.updateUser(query, dataUpdateBody, {
+          if (!login) {
+            const password = await hashPassword(update.password);
+            const dataUpdateBody = {
+              ...update,
+              password,
+            };
+            return await this.userRepository.updateUser(query, dataUpdateBody, {
+              new: true,
+            });
+          }
+          return await this.userRepository.updateUser(query, update, {
             new: true,
           });
         }
-        throw new Error('username is not edit');
+        this.errorRes('username is not edit');
       }
-      throw new Error('not found');
+      this.errorRes('not found');
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 }

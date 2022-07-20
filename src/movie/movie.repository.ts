@@ -14,21 +14,24 @@ import {
 import { Movie, MovieDocument } from './schema/movie.schema';
 import * as fs from 'fs';
 import { User, UserDocument } from '../user/schemas/user.schema';
+import { ErrorResponse } from 'src/commons/response/error';
 
 @Injectable()
-export class MovieRepository {
+export class MovieRepository extends ErrorResponse {
   constructor(
     @InjectModel(Movie.name) private movieModel: Model<MovieDocument>,
     @InjectModel(CategoryMovie.name)
     private categoryModel: Model<CategoryMovieDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-  ) {}
+  ) {
+    super();
+  }
 
   async createMovie(input: DocumentDefinition<MovieDocument>): Promise<Movie> {
     try {
       return await this.movieModel.create(input);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -47,7 +50,7 @@ export class MovieRepository {
       );
       return this.movieModel.findByIdAndRemove(id);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -93,11 +96,11 @@ export class MovieRepository {
         },
       ]);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
-  async getMovie() {
+  async getMovie(reqBody: { page: number; rowPerPage: number }) {
     try {
       return this.movieModel.aggregate([
         {
@@ -130,9 +133,15 @@ export class MovieRepository {
             'authors.fullname': 1,
           },
         },
+        {
+          $skip: reqBody.page
+            ? reqBody.page * reqBody.rowPerPage - reqBody.rowPerPage
+            : 0,
+        },
+        { $limit: reqBody.rowPerPage ? reqBody.rowPerPage : 100 },
       ]);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -144,7 +153,7 @@ export class MovieRepository {
     try {
       return await this.categoryModel.findOneAndUpdate(query, update, options);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -155,7 +164,7 @@ export class MovieRepository {
     try {
       return await this.categoryModel.findOne(query, {}, options);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 }

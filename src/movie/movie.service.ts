@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DocumentDefinition, FilterQuery } from 'mongoose';
+import { FilterQuery } from 'mongoose';
 import { Movie, MovieDocument } from './schema/movie.schema';
 import { MovieRepository } from './movie.repository';
 import * as fs from 'fs';
@@ -8,17 +8,20 @@ import { confirmUserCreated, getDateTimeNow } from 'src/helpers';
 import { UserRepository } from 'src/user/user.repository';
 import { Stripe } from 'stripe';
 import { CategoryMovie } from 'src/categorymovie/schema/categorymovie.schema';
+import { ErrorResponse } from 'src/commons/response/error';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2020-08-27',
 });
 
 @Injectable()
-export class MovieService {
+export class MovieService extends ErrorResponse {
   constructor(
     private movieRepository: MovieRepository,
     private userRepository: UserRepository,
-  ) {}
+  ) {
+    super();
+  }
 
   async createMovie(
     dataJson,
@@ -57,11 +60,11 @@ export class MovieService {
           );
           return movieCreated;
         }
-        throw new Error('not found category');
+        this.errorRes('not found category');
       }
-      throw new Error('File upload not empty');
+      this.errorRes('File upload not empty');
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -69,7 +72,7 @@ export class MovieService {
     try {
       return this.movieRepository.deleteMovie(id);
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -95,7 +98,7 @@ export class MovieService {
       }
       throw new Error('not found');
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -103,8 +106,8 @@ export class MovieService {
     return this.movieRepository.filterMovie(query);
   }
 
-  async getMovie() {
-    return this.movieRepository.getMovie();
+  async getMovie(reqBody) {
+    return this.movieRepository.getMovie(reqBody);
   }
 
   async searchMovie(body) {
@@ -114,7 +117,7 @@ export class MovieService {
         title: { $regex: new RegExp(text, 'i') },
       });
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -148,7 +151,7 @@ export class MovieService {
         end,
       };
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -175,7 +178,7 @@ export class MovieService {
       }
       throw new Error('not found');
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 
@@ -206,12 +209,12 @@ export class MovieService {
               new: true,
             });
           }
-          throw new Error('not found');
+          this.errorRes('not found');
         }
-        throw new Error('pay fail');
+        this.errorRes('pay fail');
       }
     } catch (error) {
-      throw new Error(error);
+      this.errorRes(error);
     }
   }
 }

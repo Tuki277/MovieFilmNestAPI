@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
+import { ErrorResponse } from 'src/commons/response/error';
 
 export interface IGoogleOauth {
   sub: string;
@@ -15,12 +16,14 @@ export interface IGoogleOauth {
 }
 
 @Injectable()
-export class AuthService {
+export class AuthService extends ErrorResponse {
   constructor(
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
     private jwtService: JwtService,
-  ) {}
+  ) {
+    super();
+  }
 
   async validatePassword(candidatePassword: string, users: UserDocument) {
     const user: UserDocument = await this.userModel.findOne({
@@ -54,18 +57,17 @@ export class AuthService {
 
   async verifyToken(token: string) {
     try {
-      const decode = this.jwtService.verify(token);
-      return decode;
+      return this.jwtService.verify(token);
     } catch (error) {
-      return null;
+      this.errorRes(error);
     }
   }
 
   async decodeToken(token: string) {
     try {
       return await this.verifyToken(token);
-    } catch (e) {
-      throw new Error();
+    } catch (error) {
+      this.errorRes(error);
     }
   }
 
