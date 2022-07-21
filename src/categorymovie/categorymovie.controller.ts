@@ -39,6 +39,7 @@ export class CategorymovieController extends Responses {
       log(req, ResponseMessage.QUERY_SUCCESS, LevelLogger.INFO);
       return this.responseJson(res, DoCode.GET, data);
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
     }
   }
@@ -61,8 +62,10 @@ export class CategorymovieController extends Responses {
         //@ts-ignore
         userCreated: req.user._id.toString(),
       });
+      log(req, ResponseMessage.CREATED, LevelLogger.INFO);
       return this.responseJson(res, DoCode.CREATE, category);
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
     }
   }
@@ -76,8 +79,10 @@ export class CategorymovieController extends Responses {
       const { id } = req.params;
       await paramsId.validateAsync({ id });
       await this.categoryService.deleteCategory(id);
+      log(req, ResponseMessage.DELETED, LevelLogger.INFO);
       return this.responseJson(res, DoCode.DELETE);
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
     }
   }
@@ -95,8 +100,10 @@ export class CategorymovieController extends Responses {
       await this.categoryService.updateCategory({ _id: id }, body, {
         new: true,
       });
+      log(req, ResponseMessage.UPDATED, LevelLogger.INFO);
       return this.responseJson(res, DoCode.UPDATE);
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
     }
   }

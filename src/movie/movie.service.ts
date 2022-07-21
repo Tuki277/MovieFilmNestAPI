@@ -9,6 +9,9 @@ import { UserRepository } from 'src/user/user.repository';
 import { Stripe } from 'stripe';
 import { CategoryMovie } from 'src/categorymovie/schema/categorymovie.schema';
 import { ErrorResponse } from 'src/commons/response/error';
+import { log } from 'src/commons/logger';
+import { ResponseMessage } from 'src/commons/consts/response.const';
+import { LevelLogger } from 'src/commons/consts/loger.const';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2020-08-27',
@@ -112,10 +115,13 @@ export class MovieService extends ErrorResponse {
 
   async searchMovie(body) {
     try {
-      const { text } = body;
-      return this.movieRepository.filterMovie({
-        title: { $regex: new RegExp(text, 'i') },
-      });
+      const { text, page, rowPerPage } = body;
+      return this.movieRepository.filterMovie(
+        {
+          title: { $regex: new RegExp(text, 'i') },
+        },
+        body,
+      );
     } catch (error) {
       this.errorRes(error);
     }
@@ -176,15 +182,15 @@ export class MovieService extends ErrorResponse {
           watch: false,
         };
       }
-      throw new Error('not found');
+      this.errorRes('not found');
     } catch (error) {
       this.errorRes(error);
     }
   }
 
-  async buyMovie(reqbody, userId) {
+  async buyMovie(req, userId) {
     try {
-      const { email, amount, currency, movieId } = reqbody;
+      const { email, amount, currency, movieId } = req.body;
       const customer = await stripe.customers.list({
         email,
       });
@@ -209,11 +215,14 @@ export class MovieService extends ErrorResponse {
               new: true,
             });
           }
+          log(req, ResponseMessage.NOT_FOUND, LevelLogger.INFO);
           this.errorRes('not found');
         }
+        log(req, ResponseMessage.BUY_FAIL, LevelLogger.WARNING);
         this.errorRes('pay fail');
       }
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       this.errorRes(error);
     }
   }

@@ -37,9 +37,9 @@ export class UserService extends ErrorResponse {
     }
   }
 
-  async getAllUser(role: number): Promise<User[]> {
+  async getAllUser(role: number, reqBody): Promise<User[]> {
     try {
-      return await this.userRepository.getAllUser(role);
+      return await this.userRepository.getAllUser(role, reqBody);
     } catch (error) {
       this.errorRes(error);
     }

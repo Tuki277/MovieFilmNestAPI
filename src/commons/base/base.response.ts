@@ -1,19 +1,30 @@
-import { JsonResponse } from 'src/helpers';
+import {
+  JsonResponse,
+  processDoCode,
+  processResponseMessage,
+} from 'src/helpers';
 
 export class BaseResponse {
-  response(
+  response = (
     res,
-    code,
+    doCode: number,
     statusState: boolean,
-    message: string,
     data?: any,
     access_token?: string,
     refresh_token?: string,
-  ) {
-    return res
-      .status(code)
+  ) =>
+    res
+      .status(processDoCode(doCode))
       .json(
-        JsonResponse(statusState, message, data, access_token, refresh_token),
+        JsonResponse(
+          statusState,
+          processResponseMessage(doCode),
+          data,
+          access_token,
+          refresh_token,
+        ),
       );
-  }
+
+  responseError = (res, httpStatus, message) =>
+    res.status(httpStatus).json(JsonResponse(true, message));
 }

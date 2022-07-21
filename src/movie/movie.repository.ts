@@ -54,7 +54,10 @@ export class MovieRepository extends ErrorResponse {
     }
   }
 
-  async filterMovie(query: FilterQuery<MovieDocument>) {
+  async filterMovie(
+    query: FilterQuery<MovieDocument>,
+    reqBody?: { page: number; rowPerPage: number },
+  ) {
     try {
       if (query._id) {
         query = {
@@ -94,6 +97,12 @@ export class MovieRepository extends ErrorResponse {
             'authors.fullname': 1,
           },
         },
+        {
+          $skip: reqBody.page
+            ? reqBody.page * reqBody.rowPerPage - reqBody.rowPerPage
+            : 0,
+        },
+        { $limit: reqBody.rowPerPage ? reqBody.rowPerPage : 100 },
       ]);
     } catch (error) {
       this.errorRes(error);

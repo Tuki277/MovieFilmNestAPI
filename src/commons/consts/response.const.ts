@@ -3,6 +3,7 @@ import { IDoCode, IResponseMessage } from '../interface';
 export const ResponseMessage: IResponseMessage = {
   NOT_FOUND: 'Not found',
   FORBIDDEN: 'Forbidden',
+  UNAUTHORIZED: 'Unauthorized',
   OK: 'OK',
   UNKNOWN_ERROR: 'Unknown',
   CREATED: 'Created',
@@ -10,6 +11,8 @@ export const ResponseMessage: IResponseMessage = {
   DELETED: 'Deleted',
   QUERY_SUCCESS: 'Query success',
   BUY_SUCCESS: 'Buy success',
+  BUY_FAIL: 'Buy fail',
+  DOWNLOAD_SUCCESS: 'Download success',
 };
 
 export const DoCode: IDoCode = {

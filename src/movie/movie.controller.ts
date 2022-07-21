@@ -27,7 +27,9 @@ import {
 } from '@nestjs/swagger';
 import { BuyMovie, MovieSwagger, Paging, SearchMovie } from '../swagger';
 import { Responses } from 'src/commons/response';
-import { DoCode } from 'src/commons/consts/response.const';
+import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
+import { log } from 'src/commons/logger';
+import { LevelLogger } from 'src/commons/consts/loger.const';
 
 export interface IResponse extends Request {
   file: any;
@@ -46,29 +48,38 @@ export class MovieController extends Responses {
   async playVideoStream(@Req() req: Request, @Res() res: Response) {
     const { id } = req.params;
     const range = req.headers.range;
-
-    const dataResult = await this.movieService.playVideoStream(id, range);
-    const { start, end, headers, videoPath } = dataResult;
-    res.writeHead(206, headers);
-
-    const stream = fs.createReadStream(videoPath, { start, end });
-    stream.pipe(res);
+    try {
+      const dataResult = await this.movieService.playVideoStream(id, range);
+      const { start, end, headers, videoPath } = dataResult;
+      res.writeHead(206, headers);
+      const stream = fs.createReadStream(videoPath, { start, end });
+      stream.pipe(res);
+    } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
+      return this.error(res, error);
+    }
   }
 
   @ApiParam({ name: 'id', type: 'string' })
   @Get('movie/do=download/:id')
   async downloadFileReport(@Req() req: Request, @Res() res: Response) {
-    const { id } = req.params;
-    const movie: MovieDocument[] = await this.movieService.filterMovie({
-      _id: id,
-    });
-    const fileName = movie[0].fileName;
-    const directoryPath = movie[0].filmLocation;
-    res.download(directoryPath, fileName, (err) => {
-      if (err) {
-        return res.status(500).json(JsonResponse(true, err.message));
-      }
-    });
+    try {
+      const { id } = req.params;
+      const movie: MovieDocument[] = await this.movieService.filterMovie({
+        _id: id,
+      });
+      const fileName = movie[0].fileName;
+      const directoryPath = movie[0].filmLocation;
+      log(req, ResponseMessage.DOWNLOAD_SUCCESS, LevelLogger.INFO);
+      res.download(directoryPath, fileName, (err) => {
+        if (err) {
+          return res.status(500).json(JsonResponse(true, err.message));
+        }
+      });
+    } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
+      return this.error(res, error);
+    }
   }
 
   @UseGuards(AuthGuard('auth'))
@@ -77,7 +88,8 @@ export class MovieController extends Responses {
   async buyMovie(@Req() req: Request, @Res() res: Response) {
     try {
       const userId = (req as IResponse).user._id;
-      await this.movieService.buyMovie(req.body, userId);
+      await this.movieService.buyMovie(req, userId);
+      log(req, ResponseMessage.BUY_SUCCESS, LevelLogger.INFO);
       return this.responseJson(res, DoCode.BUY);
     } catch (error) {
       return this.error(res, error);
@@ -99,8 +111,12 @@ export class MovieController extends Responses {
   @Post('movie/do=search')
   @ApiBody({ type: SearchMovie })
   async filterMovie(@Req() req: Request, @Res() res: Response) {
-    const movieResult = await this.movieService.searchMovie(req.body);
-    return this.responseJson(res, DoCode.GET, movieResult);
+    try {
+      const movieResult = await this.movieService.searchMovie(req.body);
+      return this.responseJson(res, DoCode.GET, movieResult);
+    } catch (error) {
+      return this.error(res, error);
+    }
   }
 
   @ApiBody({ type: Paging })
@@ -108,8 +124,10 @@ export class MovieController extends Responses {
   async getAllMovieList(@Req() req: Request, @Res() res: Response) {
     try {
       const dataResult = await this.movieService.getMovie(req.body);
+      log(req, ResponseMessage.OK, LevelLogger.INFO);
       return this.responseJson(res, DoCode.GET, dataResult);
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       this.error(res, error);
     }
   }
@@ -177,8 +195,10 @@ export class MovieController extends Responses {
       const { id } = req.params;
       await idPrams.validateAsync({ id });
       await this.movieService.deleteMovieService(id, user);
+      log(req, ResponseMessage.DELETED, LevelLogger.INFO);
       return this.responseJson(res, DoCode.DELETE);
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
     }
   }

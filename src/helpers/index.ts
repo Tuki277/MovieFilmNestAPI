@@ -1,4 +1,6 @@
+import { HttpStatus } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 
 export const hashPassword = async (password: string) => {
   try {
@@ -7,6 +9,31 @@ export const hashPassword = async (password: string) => {
     return hash;
   } catch (error) {
     throw Error(error);
+  }
+};
+
+export const processDoCode = (doCode: number): number => {
+  return doCode === DoCode.GET || DoCode.UPDATE || DoCode.DELETE || DoCode.BUY
+    ? HttpStatus.OK
+    : doCode === DoCode.CREATE
+    ? HttpStatus.CREATED
+    : HttpStatus.NOT_FOUND;
+};
+
+export const processResponseMessage = (doCode: number): string => {
+  switch (doCode) {
+    case DoCode.CREATE:
+      return ResponseMessage.CREATED;
+    case DoCode.GET:
+      return ResponseMessage.OK;
+    case DoCode.UPDATE:
+      return ResponseMessage.UPDATED;
+    case DoCode.DELETE:
+      return ResponseMessage.DELETED;
+    case DoCode.NOT_FOUND:
+      return ResponseMessage.NOT_FOUND;
+    case DoCode.BUY:
+      return ResponseMessage.BUY_SUCCESS;
   }
 };
 

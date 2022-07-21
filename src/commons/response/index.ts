@@ -1,77 +1,43 @@
 import { HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
-import { JsonResponse } from 'src/helpers';
 import { BaseResponse } from '../base/base.response';
 import { DoCode, ResponseMessage } from '../consts/response.const';
 
 export class Responses extends BaseResponse {
   responseJson(res: Response, doCode: number, data?: any) {
-    switch (doCode) {
-      case DoCode.CREATE:
-        return this.response(
-          res,
-          HttpStatus.CREATED,
-          false,
-          ResponseMessage.CREATED,
-          data,
-        );
-      case DoCode.GET:
-        return this.response(
-          res,
-          HttpStatus.OK,
-          false,
-          ResponseMessage.QUERY_SUCCESS,
-          data,
-        );
-      case DoCode.UPDATE:
-        return this.response(
-          res,
-          HttpStatus.OK,
-          false,
-          ResponseMessage.UPDATED,
-        );
-      case DoCode.DELETE:
-        return this.response(
-          res,
-          HttpStatus.OK,
-          false,
-          ResponseMessage.DELETED,
-        );
-      case DoCode.NOT_FOUND:
-        return this.response(
-          res,
-          HttpStatus.NOT_FOUND,
-          false,
-          ResponseMessage.NOT_FOUND,
-        );
-      case DoCode.BUY:
-        return this.response(
-          res,
-          HttpStatus.OK,
-          false,
-          ResponseMessage.BUY_SUCCESS,
-        );
-      default:
-        return this.response(
-          res,
-          HttpStatus.NOT_FOUND,
-          true,
-          ResponseMessage.NOT_FOUND,
-        );
+    if (doCode === DoCode.CREATE || doCode === DoCode.GET) {
+      return this.response(res, doCode, false, data);
+    } else {
+      return this.response(res, doCode, false);
     }
   }
 
   error(res, error) {
     if (error && error.isJoi) {
-      return this.response(
+      return this.responseError(
         res,
         HttpStatus.UNPROCESSABLE_ENTITY,
-        true,
         error.message,
       );
     }
-    return res
-      .status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .json(JsonResponse(true, error.message));
+    if (error && error === HttpStatus.UNAUTHORIZED) {
+      return this.responseError(
+        res,
+        HttpStatus.UNAUTHORIZED,
+        ResponseMessage.UNAUTHORIZED,
+      );
+    }
+    if (error && error === HttpStatus.FORBIDDEN) {
+      return this.responseError(
+        res,
+        HttpStatus.FORBIDDEN,
+        ResponseMessage.FORBIDDEN,
+      );
+    }
+    return this.responseError(
+      res,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      error.message,
+    );
   }
 }

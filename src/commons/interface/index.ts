@@ -8,6 +8,9 @@ export interface IResponseMessage {
   DELETED: string;
   QUERY_SUCCESS: string;
   BUY_SUCCESS: string;
+  BUY_FAIL: string;
+  DOWNLOAD_SUCCESS: string;
+  UNAUTHORIZED: string;
 }
 
 export interface IDoCode {

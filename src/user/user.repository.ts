@@ -24,7 +24,10 @@ export class UserRepository extends ErrorResponse {
     }
   }
 
-  async getAllUser(role: number): Promise<User[]> {
+  async getAllUser(
+    role: number,
+    reqBody: { page: number; rowPerPage: number },
+  ): Promise<User[]> {
     try {
       return await this.userModel.aggregate([
         { $match: { role: { $gte: role } } },
@@ -47,6 +50,12 @@ export class UserRepository extends ErrorResponse {
             },
           },
         },
+        {
+          $skip: reqBody.page
+            ? reqBody.page * reqBody.rowPerPage - reqBody.rowPerPage
+            : 0,
+        },
+        { $limit: reqBody.rowPerPage ? reqBody.rowPerPage : 100 },
       ]);
     } catch (error) {
       this.errorRes(error);
