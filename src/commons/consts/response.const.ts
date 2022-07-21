@@ -13,6 +13,8 @@ export const ResponseMessage: IResponseMessage = {
   BUY_SUCCESS: 'Buy success',
   BUY_FAIL: 'Buy fail',
   DOWNLOAD_SUCCESS: 'Download success',
+  LOGIN_FAIL: 'Login fail',
+  LOGIN_SUCCESS: 'Login success',
 };
 
 export const DoCode: IDoCode = {
@@ -22,4 +24,5 @@ export const DoCode: IDoCode = {
   UPDATE: 3,
   NOT_FOUND: 4,
   BUY: 5,
+  LOGIN: 6,
 };

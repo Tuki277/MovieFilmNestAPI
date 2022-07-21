@@ -115,7 +115,7 @@ export class MovieService extends ErrorResponse {
 
   async searchMovie(body) {
     try {
-      const { text, page, rowPerPage } = body;
+      const { text } = body;
       return this.movieRepository.filterMovie(
         {
           title: { $regex: new RegExp(text, 'i') },

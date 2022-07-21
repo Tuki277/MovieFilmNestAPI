@@ -11,6 +11,8 @@ export interface IResponseMessage {
   BUY_FAIL: string;
   DOWNLOAD_SUCCESS: string;
   UNAUTHORIZED: string;
+  LOGIN_SUCCESS: string;
+  LOGIN_FAIL: string;
 }
 
 export interface IDoCode {
@@ -20,6 +22,7 @@ export interface IDoCode {
   UPDATE: number;
   NOT_FOUND: number;
   BUY: number;
+  LOGIN: number;
 }
 
 export interface IPaging {

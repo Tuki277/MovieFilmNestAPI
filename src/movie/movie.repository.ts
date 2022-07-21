@@ -98,11 +98,11 @@ export class MovieRepository extends ErrorResponse {
           },
         },
         {
-          $skip: reqBody.page
+          $skip: reqBody
             ? reqBody.page * reqBody.rowPerPage - reqBody.rowPerPage
             : 0,
         },
-        { $limit: reqBody.rowPerPage ? reqBody.rowPerPage : 100 },
+        { $limit: reqBody ? reqBody.rowPerPage : 100 },
       ]);
     } catch (error) {
       this.errorRes(error);

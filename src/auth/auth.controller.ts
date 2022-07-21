@@ -9,15 +9,21 @@ import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Login, RefreshToken, UserSwagger } from 'src/swagger';
 import { UserDocument } from 'src/user/schemas/user.schema';
 import { AuthGuard } from '@nestjs/passport';
+import { Responses } from 'src/commons/response';
+import { DoCode } from 'src/commons/consts/response.const';
+import { log } from 'src/commons/logger';
+import { LevelLogger } from 'src/commons/consts/loger.const';
 
 @ApiTags('auth')
 @Controller('auth')
-export class AuthController {
+export class AuthController extends Responses {
   constructor(
     private jwtService: JwtService,
     private authService: AuthService,
     private userService: UserService,
-  ) {}
+  ) {
+    super();
+  }
 
   @ApiBody({ type: Login })
   @Post('login')
@@ -47,13 +53,10 @@ export class AuthController {
         true,
       );
       const jwt = this.jwtService.sign(payload);
-      return res
-        .status(200)
-        .json(JsonResponse(false, 'Login Success', jwt, refreshToken));
-    } catch (e) {
-      if (e.isJoi) {
-        return res.status(422).json(JsonResponse(true, e.message));
-      }
+      return this.responseJson(res, DoCode.LOGIN, null, jwt, refreshToken);
+    } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
+      return this.error(res, error);
     }
   }
 
@@ -94,6 +97,7 @@ export class AuthController {
         },
       });
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       return res.status(403).json(JsonResponse(false, error));
     }
   }
@@ -106,15 +110,11 @@ export class AuthController {
       const check = await this.userService.checkUsernameDuplicated(req.body);
       if (check) {
         await this.userService.createUser(req.body);
-        return res.status(201).json(JsonResponse(false, 'created'));
+        return this.responseJson(res, DoCode.CREATE);
       }
-      return res
-        .status(401)
-        .json(JsonResponse(false, 'Username is duplicated'));
+      return this.error(res, 'username is duplicated');
     } catch (e) {
-      if (e.isJoi) {
-        return res.status(422).json(JsonResponse(true, e.message));
-      }
+      return this.error(res, e);
     }
   }
 

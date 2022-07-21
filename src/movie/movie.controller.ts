@@ -92,6 +92,7 @@ export class MovieController extends Responses {
       log(req, ResponseMessage.BUY_SUCCESS, LevelLogger.INFO);
       return this.responseJson(res, DoCode.BUY);
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
     }
   }
@@ -104,6 +105,7 @@ export class MovieController extends Responses {
       const movie = await this.movieService.getDetailMovie(id, idUser);
       return this.responseJson(res, DoCode.GET, movie);
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
     }
   }
@@ -115,6 +117,7 @@ export class MovieController extends Responses {
       const movieResult = await this.movieService.searchMovie(req.body);
       return this.responseJson(res, DoCode.GET, movieResult);
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
     }
   }
@@ -143,6 +146,7 @@ export class MovieController extends Responses {
       });
       return this.responseJson(res, DoCode.GET, data);
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
     }
   }
@@ -181,6 +185,7 @@ export class MovieController extends Responses {
       );
       return this.responseJson(res, DoCode.CREATE, dataAdd);
     } catch (error) {
+      log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
     }
   }

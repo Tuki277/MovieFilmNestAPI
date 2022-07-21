@@ -4,9 +4,17 @@ import { BaseResponse } from '../base/base.response';
 import { DoCode, ResponseMessage } from '../consts/response.const';
 
 export class Responses extends BaseResponse {
-  responseJson(res: Response, doCode: number, data?: any) {
+  responseJson(
+    res: Response,
+    doCode: number,
+    data?: any,
+    token?: string,
+    rf_token?: string,
+  ) {
     if (doCode === DoCode.CREATE || doCode === DoCode.GET) {
       return this.response(res, doCode, false, data);
+    } else if (doCode === DoCode.LOGIN) {
+      return this.response(res, doCode, false, null, token, rf_token);
     } else {
       return this.response(res, doCode, false);
     }
