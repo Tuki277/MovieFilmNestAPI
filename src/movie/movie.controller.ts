@@ -23,9 +23,10 @@ import {
   ApiBody,
   ApiConsumes,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { BuyMovie, MovieSwagger, Paging, SearchMovie } from '../swagger';
+import { BuyMovie, MovieSwagger, SearchMovie } from '../swagger';
 import { Responses } from 'src/commons/response';
 import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 import { log } from 'src/commons/logger';
@@ -122,11 +123,12 @@ export class MovieController extends Responses {
     }
   }
 
-  @ApiBody({ type: Paging })
-  @Post('movie/do=all')
+  @ApiQuery({ name: 'rowPerPage', type: Number, required: false })
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @Get('movie/do=all')
   async getAllMovieList(@Req() req: Request, @Res() res: Response) {
     try {
-      const dataResult = await this.movieService.getMovie(req.body);
+      const dataResult = await this.movieService.getMovie(req.query);
       log(req, ResponseMessage.OK, LevelLogger.INFO);
       return this.responseJson(res, DoCode.GET, dataResult);
     } catch (error) {

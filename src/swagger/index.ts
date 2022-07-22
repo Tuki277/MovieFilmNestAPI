@@ -53,14 +53,6 @@ export class CategorySwagger {
   title: string;
 }
 
-export class Paging {
-  @ApiProperty()
-  page: number;
-
-  @ApiProperty()
-  rowPerPage: number;
-}
-
 export class BuyMovie {
   @ApiProperty()
   email: string;

@@ -109,8 +109,8 @@ export class MovieService extends ErrorResponse {
     return this.movieRepository.filterMovie(query);
   }
 
-  async getMovie(reqBody) {
-    return this.movieRepository.getMovie(reqBody);
+  async getMovie(reqQuery) {
+    return this.movieRepository.getMovie(reqQuery);
   }
 
   async searchMovie(body) {

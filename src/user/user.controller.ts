@@ -1,20 +1,24 @@
 import {
   Controller,
   Get,
-  Post,
   Res,
   Req,
   Delete,
   Put,
   UseGuards,
-  Patch,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { User, UserDocument } from './schemas/user.schema';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Paging, UserSwagger } from '../swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { UserSwagger } from '../swagger';
 import { Responses } from 'src/commons/response';
 import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 import { LevelLogger } from 'src/commons/consts/loger.const';
@@ -33,13 +37,14 @@ export class UserController extends Responses {
 
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
-  @ApiBody({ type: Paging })
-  @Post('user/do=all')
+  @ApiQuery({ name: 'rowPerPage', type: Number, required: false })
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @Get('user/do=all')
   async getAllUser(@Req() req: Request, @Res() res: Response) {
     try {
       const data = await this.userService.getAllUser(
         (req as ReqUser).user.role,
-        req.body,
+        req.query,
       );
       log(req, ResponseMessage.OK, LevelLogger.INFO);
       return this.responseJson(res, DoCode.GET, data);

@@ -24,11 +24,10 @@ export class UserRepository extends ErrorResponse {
     }
   }
 
-  async getAllUser(
-    role: number,
-    reqBody: { page: number; rowPerPage: number },
-  ): Promise<User[]> {
+  async getAllUser(role: number, reqQuery): Promise<User[]> {
     try {
+      const page = parseInt(reqQuery.page);
+      const rowPerPage = parseInt(reqQuery.rowPerPage);
       return await this.userModel.aggregate([
         { $match: { role: { $gte: role } } },
         {
@@ -51,11 +50,9 @@ export class UserRepository extends ErrorResponse {
           },
         },
         {
-          $skip: reqBody.page
-            ? reqBody.page * reqBody.rowPerPage - reqBody.rowPerPage
-            : 0,
+          $skip: page ? page * rowPerPage - rowPerPage : 0,
         },
-        { $limit: reqBody.rowPerPage ? reqBody.rowPerPage : 100 },
+        { $limit: rowPerPage ? rowPerPage : 100 },
       ]);
     } catch (error) {
       this.errorRes(error);

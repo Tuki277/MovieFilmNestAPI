@@ -109,8 +109,10 @@ export class MovieRepository extends ErrorResponse {
     }
   }
 
-  async getMovie(reqBody: { page: number; rowPerPage: number }) {
+  async getMovie(reqQuery) {
     try {
+      const page = parseInt(reqQuery.page);
+      const rowPerPage = parseInt(reqQuery.rowPerPage);
       return this.movieModel.aggregate([
         {
           $lookup: {
@@ -143,11 +145,9 @@ export class MovieRepository extends ErrorResponse {
           },
         },
         {
-          $skip: reqBody.page
-            ? reqBody.page * reqBody.rowPerPage - reqBody.rowPerPage
-            : 0,
+          $skip: page ? page * rowPerPage - rowPerPage : 0,
         },
-        { $limit: reqBody.rowPerPage ? reqBody.rowPerPage : 100 },
+        { $limit: rowPerPage ? rowPerPage : 100 },
       ]);
     } catch (error) {
       this.errorRes(error);

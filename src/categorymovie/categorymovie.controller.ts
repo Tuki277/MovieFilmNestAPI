@@ -6,6 +6,7 @@ import {
   Post,
   Delete,
   Patch,
+  Get,
 } from '@nestjs/common';
 import { CategorymovieService } from './categorymovie.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -15,8 +16,14 @@ import {
   createCategorySchema,
   paramsId,
 } from './schema/categorymovie.validate';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { CategorySwagger, Paging } from 'src/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { CategorySwagger } from 'src/swagger';
 import { Responses } from 'src/commons/response';
 import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 import { log } from 'src/commons/logger';
@@ -29,12 +36,13 @@ export class CategorymovieController extends Responses {
     super();
   }
 
-  @ApiBody({ type: Paging })
-  @Post('categories/do=all')
+  @Get('categories/do=all')
+  @ApiQuery({ name: 'rowPerPage', type: Number, required: false })
+  @ApiQuery({ name: 'page', type: Number, required: false })
   async getAllCategories(@Req() req: Request, @Res() res: Response) {
     try {
       const data: CategoryMovie[] = await this.categoryService.getAllCategory(
-        req.body,
+        req.query,
       );
       log(req, ResponseMessage.QUERY_SUCCESS, LevelLogger.INFO);
       return this.responseJson(res, DoCode.GET, data);
