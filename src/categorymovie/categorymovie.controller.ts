@@ -41,9 +41,13 @@ export class CategorymovieController extends Responses {
   @ApiQuery({ name: 'page', type: Number, required: false })
   async getAllCategories(@Req() req: Request, @Res() res: Response) {
     try {
-      const data: CategoryMovie[] = await this.categoryService.getAllCategory(
-        req.query,
-      );
+      const dataRes: CategoryMovie[] =
+        await this.categoryService.getAllCategory(req.query);
+      const total = await this.categoryService.getCountCategory();
+      const data = {
+        dataRes,
+        total,
+      };
       log(req, ResponseMessage.QUERY_SUCCESS, LevelLogger.INFO);
       return this.responseJson(res, DoCode.GET, data);
     } catch (error) {

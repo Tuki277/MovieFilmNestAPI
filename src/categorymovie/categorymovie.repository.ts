@@ -34,6 +34,10 @@ export class CategoryMovieRepository extends ErrorResponse {
     }
   }
 
+  async getCountCategory() {
+    return await this.categoryModel.find().count();
+  }
+
   async getAllCategory(reqQuery): Promise<CategoryMovie[]> {
     try {
       const page = parseInt(reqQuery.page);

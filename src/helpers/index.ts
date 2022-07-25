@@ -40,6 +40,7 @@ export const processResponseMessage = (doCode: number): string => {
 export const JsonResponse = (
   error: boolean,
   message: string,
+  total?: number,
   data?: any,
   accessToken?: string,
   refreshToken?: string,
@@ -48,6 +49,7 @@ export const JsonResponse = (
     result: {
       error,
       message,
+      total,
       data,
       accessToken,
       refreshToken,

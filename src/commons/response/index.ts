@@ -11,10 +11,12 @@ export class Responses extends BaseResponse {
     token?: string,
     rf_token?: string,
   ) {
-    if (doCode === DoCode.CREATE || doCode === DoCode.GET) {
-      return this.response(res, doCode, false, data);
+    if (doCode === DoCode.GET) {
+      return this.response(res, doCode, false, data.total, data.dataRes);
+    } else if (doCode === DoCode.CREATE) {
+      return this.response(res, doCode, false, null, data);
     } else if (doCode === DoCode.LOGIN) {
-      return this.response(res, doCode, false, null, token, rf_token);
+      return this.response(res, doCode, false, null, null, token, rf_token);
     } else {
       return this.response(res, doCode, false);
     }

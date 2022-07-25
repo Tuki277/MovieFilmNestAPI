@@ -129,8 +129,13 @@ export class MovieController extends Responses {
   async getAllMovieList(@Req() req: Request, @Res() res: Response) {
     try {
       const dataResult = await this.movieService.getMovie(req.query);
+      const total = await this.movieService.getAllMovie();
+      const data = {
+        dataRes: dataResult,
+        total,
+      };
       log(req, ResponseMessage.OK, LevelLogger.INFO);
-      return this.responseJson(res, DoCode.GET, dataResult);
+      return this.responseJson(res, DoCode.GET, data);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
       this.error(res, error);

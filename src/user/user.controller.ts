@@ -42,10 +42,15 @@ export class UserController extends Responses {
   @Get('user/do=all')
   async getAllUser(@Req() req: Request, @Res() res: Response) {
     try {
-      const data = await this.userService.getAllUser(
+      const dataRes = await this.userService.getAllUser(
         (req as ReqUser).user.role,
         req.query,
       );
+      const total = await this.userService.getCountUser();
+      const data = {
+        dataRes,
+        total,
+      };
       log(req, ResponseMessage.OK, LevelLogger.INFO);
       return this.responseJson(res, DoCode.GET, data);
     } catch (error) {

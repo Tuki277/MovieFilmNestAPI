@@ -156,4 +156,8 @@ export class MovieRepository extends ErrorResponse {
   ) {
     return this.categoryModel.findOne(query, {}, options);
   }
+
+  getCountMovie() {
+    return this.movieModel.find().count();
+  }
 }

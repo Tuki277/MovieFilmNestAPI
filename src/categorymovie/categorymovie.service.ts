@@ -21,6 +21,10 @@ export class CategorymovieService {
     return this.categoryMovieRepository.createCategory(input);
   }
 
+  getCountCategory() {
+    return this.categoryMovieRepository.getCountCategory();
+  }
+
   getAllCategory(reqBody): Promise<CategoryMovie[]> {
     return this.categoryMovieRepository.getAllCategory(reqBody);
   }

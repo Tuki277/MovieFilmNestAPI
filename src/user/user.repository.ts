@@ -66,4 +66,8 @@ export class UserRepository {
   ) {
     return this.userModel.findOneAndUpdate(query, update, options);
   }
+
+  getCountUser() {
+    return this.userModel.find().count();
+  }
 }

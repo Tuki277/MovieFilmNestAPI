@@ -226,4 +226,12 @@ export class MovieService extends ErrorResponse {
       this.errorRes(error);
     }
   }
+
+  async getAllMovie() {
+    try {
+      return await this.movieRepository.getCountMovie();
+    } catch (error) {
+      this.errorRes(error);
+    }
+  }
 }

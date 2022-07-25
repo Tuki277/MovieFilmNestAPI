@@ -94,4 +94,12 @@ export class UserService extends ErrorResponse {
       this.errorRes(error);
     }
   }
+
+  async getCountUser() {
+    try {
+      return this.userRepository.getCountUser();
+    } catch (error) {
+      this.errorRes(error);
+    }
+  }
 }

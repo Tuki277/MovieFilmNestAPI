@@ -9,6 +9,7 @@ export class BaseResponse {
     res,
     doCode: number,
     statusState: boolean,
+    total?: number,
     data?: any,
     access_token?: string,
     refresh_token?: string,
@@ -19,6 +20,7 @@ export class BaseResponse {
         JsonResponse(
           statusState,
           processResponseMessage(doCode),
+          total,
           data,
           access_token,
           refresh_token,
