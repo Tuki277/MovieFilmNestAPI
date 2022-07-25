@@ -13,7 +13,6 @@ import {
 } from 'mongoose';
 import { MovieService } from '../movie/movie.service';
 import { ErrorResponse } from 'src/commons/response/error';
-import { log } from 'src/commons/logger';
 
 @Injectable()
 export class CategoryMovieRepository extends ErrorResponse {

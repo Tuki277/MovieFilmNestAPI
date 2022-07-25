@@ -10,64 +10,37 @@ import {
   UpdateQuery,
 } from 'mongoose';
 import { CategoryMovieRepository } from './categorymovie.repository';
-import { ErrorResponse } from 'src/commons/response/error';
 
 @Injectable()
-export class CategorymovieService extends ErrorResponse {
-  constructor(private categoryMovieRepository: CategoryMovieRepository) {
-    super();
-  }
+export class CategorymovieService {
+  constructor(private categoryMovieRepository: CategoryMovieRepository) {}
 
-  async createCategory(
+  createCategory(
     input: DocumentDefinition<CategoryMovieDocument>,
   ): Promise<CategoryMovie> {
-    try {
-      return await this.categoryMovieRepository.createCategory(input);
-    } catch (error) {
-      this.errorRes(error);
-    }
+    return this.categoryMovieRepository.createCategory(input);
   }
 
-  async getAllCategory(reqBody): Promise<CategoryMovie[]> {
-    try {
-      return await this.categoryMovieRepository.getAllCategory(reqBody);
-    } catch (error) {
-      this.errorRes(error);
-    }
+  getAllCategory(reqBody): Promise<CategoryMovie[]> {
+    return this.categoryMovieRepository.getAllCategory(reqBody);
   }
 
-  async filterCategory(
+  filterCategory(
     query: FilterQuery<CategoryMovieDocument>,
     options: QueryOptions = { learn: true },
   ): Promise<CategoryMovie> {
-    try {
-      return await this.categoryMovieRepository.filterCategory(query, options);
-    } catch (error) {
-      this.errorRes(error);
-    }
+    return this.categoryMovieRepository.filterCategory(query, options);
   }
 
-  async updateCategory(
+  updateCategory(
     query: FilterQuery<CategoryMovieDocument>,
     update: UpdateQuery<CategoryMovieDocument>,
     options: QueryOptions,
   ): Promise<CategoryMovie> {
-    try {
-      return await this.categoryMovieRepository.updateCategory(
-        query,
-        update,
-        options,
-      );
-    } catch (error) {
-      this.errorRes(error);
-    }
+    return this.categoryMovieRepository.updateCategory(query, update, options);
   }
 
-  async deleteCategory(id: string) {
-    try {
-      return await this.categoryMovieRepository.deleteCategory(id);
-    } catch (error) {
-      this.errorRes(error);
-    }
+  deleteCategory(id: string) {
+    return this.categoryMovieRepository.deleteCategory(id);
   }
 }

@@ -28,11 +28,7 @@ export class MovieRepository extends ErrorResponse {
   }
 
   async createMovie(input: DocumentDefinition<MovieDocument>): Promise<Movie> {
-    try {
-      return await this.movieModel.create(input);
-    } catch (error) {
-      this.errorRes(error);
-    }
+    return this.movieModel.create(input);
   }
 
   async deleteMovie(id: string) {
@@ -54,126 +50,110 @@ export class MovieRepository extends ErrorResponse {
     }
   }
 
-  async filterMovie(
+  filterMovie(
     query: FilterQuery<MovieDocument>,
     reqBody?: { page: number; rowPerPage: number },
   ) {
-    try {
-      if (query._id) {
-        query = {
-          _id: new mongoose.Types.ObjectId(query._id),
-        };
-      }
-      return this.movieModel.aggregate([
-        { $match: query },
-        {
-          $lookup: {
-            from: 'categorymovies',
-            localField: 'categoryMovie',
-            foreignField: '_id',
-            as: 'category',
-          },
-        },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'authorCreated',
-            foreignField: '_id',
-            as: 'authors',
-          },
-        },
-        {
-          $project: {
-            title: 1,
-            description: 1,
-            filmLocation: 1,
-            region: 1,
-            views: 1,
-            yearRelease: 1,
-            status: 1,
-            fileName: 1,
-            authorCreated: 1,
-            'category.title': 1,
-            'authors.fullname': 1,
-          },
-        },
-        {
-          $skip: reqBody
-            ? reqBody.page * reqBody.rowPerPage - reqBody.rowPerPage
-            : 0,
-        },
-        { $limit: reqBody ? reqBody.rowPerPage : 100 },
-      ]);
-    } catch (error) {
-      this.errorRes(error);
+    if (query._id) {
+      query = {
+        _id: new mongoose.Types.ObjectId(query._id),
+      };
     }
+    return this.movieModel.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: 'categorymovies',
+          localField: 'categoryMovie',
+          foreignField: '_id',
+          as: 'category',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'authorCreated',
+          foreignField: '_id',
+          as: 'authors',
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          description: 1,
+          filmLocation: 1,
+          region: 1,
+          views: 1,
+          yearRelease: 1,
+          status: 1,
+          fileName: 1,
+          authorCreated: 1,
+          'category.title': 1,
+          'authors.fullname': 1,
+        },
+      },
+      {
+        $skip: reqBody
+          ? reqBody.page * reqBody.rowPerPage - reqBody.rowPerPage
+          : 0,
+      },
+      { $limit: reqBody ? reqBody.rowPerPage : 100 },
+    ]);
   }
 
-  async getMovie(reqQuery) {
-    try {
-      const page = parseInt(reqQuery.page);
-      const rowPerPage = parseInt(reqQuery.rowPerPage);
-      return this.movieModel.aggregate([
-        {
-          $lookup: {
-            from: 'categorymovies',
-            localField: 'categoryMovie',
-            foreignField: '_id',
-            as: 'category',
-          },
+  getMovie(reqQuery) {
+    const page = parseInt(reqQuery.page);
+    const rowPerPage = parseInt(reqQuery.rowPerPage);
+    return this.movieModel.aggregate([
+      {
+        $lookup: {
+          from: 'categorymovies',
+          localField: 'categoryMovie',
+          foreignField: '_id',
+          as: 'category',
         },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'authorCreated',
-            foreignField: '_id',
-            as: 'authors',
-          },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'authorCreated',
+          foreignField: '_id',
+          as: 'authors',
         },
-        {
-          $project: {
-            title: 1,
-            description: 1,
-            filmLocation: 1,
-            region: 1,
-            views: 1,
-            yearRelease: 1,
-            status: 1,
-            fileName: 1,
-            'category.title': 1,
-            'authors.fullname': 1,
-          },
+      },
+      {
+        $project: {
+          title: 1,
+          description: 1,
+          filmLocation: 1,
+          region: 1,
+          views: 1,
+          yearRelease: 1,
+          status: 1,
+          fileName: 1,
+          'category.title': 1,
+          'authors.fullname': 1,
         },
-        {
-          $skip: page ? page * rowPerPage - rowPerPage : 0,
-        },
-        { $limit: rowPerPage ? rowPerPage : 100 },
-      ]);
-    } catch (error) {
-      this.errorRes(error);
-    }
+      },
+      {
+        $skip: page ? page * rowPerPage - rowPerPage : 0,
+      },
+      { $limit: rowPerPage ? rowPerPage : 100 },
+    ]);
   }
 
-  async updateCategory(
+  updateCategory(
     query: FilterQuery<CategoryMovieDocument>,
     update: UpdateQuery<CategoryMovieDocument>,
     options: QueryOptions,
-  ): Promise<CategoryMovie> {
-    try {
-      return await this.categoryModel.findOneAndUpdate(query, update, options);
-    } catch (error) {
-      this.errorRes(error);
-    }
+  ) {
+    return this.categoryModel.findOneAndUpdate(query, update, options);
   }
 
-  async filterCategory(
+  filterCategory(
     query: FilterQuery<CategoryMovieDocument>,
     options: QueryOptions = { learn: true },
-  ): Promise<CategoryMovie> {
-    try {
-      return await this.categoryModel.findOne(query, {}, options);
-    } catch (error) {
-      this.errorRes(error);
-    }
+  ) {
+    return this.categoryModel.findOne(query, {}, options);
   }
 }
