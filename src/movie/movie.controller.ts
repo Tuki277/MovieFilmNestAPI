@@ -104,7 +104,12 @@ export class MovieController extends Responses {
       const { id } = req.params;
       const idUser = (req as IResponse).user;
       const movie = await this.movieService.getDetailMovie(id, idUser);
-      return this.responseJson(res, DoCode.GET, movie);
+      const total = 1;
+      const data = {
+        dataRes: movie[0],
+        total,
+      };
+      return this.responseJson(res, DoCode.GET, data);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
@@ -116,7 +121,12 @@ export class MovieController extends Responses {
   async filterMovie(@Req() req: Request, @Res() res: Response) {
     try {
       const movieResult = await this.movieService.searchMovie(req.body);
-      return this.responseJson(res, DoCode.GET, movieResult);
+      const total = await this.movieService.getAllMovie();
+      const data = {
+        dataRes: movieResult,
+        total,
+      };
+      return this.responseJson(res, DoCode.GET, data);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
@@ -148,9 +158,13 @@ export class MovieController extends Responses {
   async getMovieByAccountId(@Req() req: Request, @Res() res: Response) {
     try {
       const userId: UserDocument = (req as IResponse).user;
-      const data: Movie[] = await this.movieService.filterMovie({
+      const dataRes: Movie[] = await this.movieService.filterMovie({
         authorCreated: userId._id,
       });
+      const data = {
+        dataRes,
+        total: null,
+      };
       return this.responseJson(res, DoCode.GET, data);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);

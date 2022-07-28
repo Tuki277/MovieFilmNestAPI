@@ -22,7 +22,7 @@ export class Responses extends BaseResponse {
     }
   }
 
-  error(res, error) {
+  error(res, error, options?: boolean) {
     if (error && error.isJoi) {
       return this.responseError(
         res,
@@ -43,6 +43,9 @@ export class Responses extends BaseResponse {
         HttpStatus.FORBIDDEN,
         ResponseMessage.FORBIDDEN,
       );
+    }
+    if (options) {
+      return this.responseError(res, HttpStatus.UNPROCESSABLE_ENTITY, error);
     }
     return this.responseError(
       res,

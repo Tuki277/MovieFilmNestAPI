@@ -64,20 +64,33 @@ export class UserController extends Responses {
   @Get('user/do=current-user')
   async getCurrentUser(@Req() req: Request, @Res() res: Response) {
     try {
+      let data = null;
+      let dataRes = null;
+      const total = 1;
       const user: UserDocument = (req as ReqUser).user;
       if (user.role === 1 || user.role === 2) {
-        return this.responseJson(res, DoCode.GET, {
+        dataRes = {
           ...user,
           movieUpload: user.movie.length,
           permission: true,
-        });
+        };
+        data = {
+          dataRes,
+          total,
+        };
       } else {
-        return this.responseJson(res, DoCode.GET, {
+        dataRes = {
           ...user,
           movieUpload: user.movie.length,
-          permission: true,
-        });
+          permission: false,
+        };
+        data = {
+          dataRes,
+          total,
+        };
       }
+
+      return this.responseJson(res, DoCode.GET, data);
     } catch (error) {
       return this.error(res, error);
     }

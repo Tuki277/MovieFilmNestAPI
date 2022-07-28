@@ -112,7 +112,7 @@ export class AuthController extends Responses {
         await this.userService.createUser(req.body);
         return this.responseJson(res, DoCode.CREATE);
       }
-      return this.error(res, 'username is duplicated');
+      return this.error(res, 'username is duplicated', true);
     } catch (e) {
       return this.error(res, e);
     }
