@@ -193,7 +193,7 @@ export class MovieController extends Responses {
   )
   async createMovie(@Req() req: Request, @Res() res: Response) {
     try {
-      const locationFileUpload = '../../Demo/demo-movie/';
+      const locationFileUpload = process.env.PATH_SAVE_DB;
       const renameFileUpload =
         locationFileUpload + (req as IResponse).file.path;
       const dataJson = JSON.parse(req.body.data);
@@ -232,8 +232,7 @@ export class MovieController extends Responses {
     }
   }
 
-  @ApiBearerAuth('auth')
-  @UseGuards(AuthGuard('auth'))
+  @ApiParam({ name: 'id', type: 'string' })
   @Patch('movie/do=updateview/:id')
   async updateViews(@Req() req: Request, @Res() res: Response) {
     const { id } = req.params;
