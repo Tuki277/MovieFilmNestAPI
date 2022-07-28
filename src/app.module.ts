@@ -13,7 +13,7 @@ import { MovieModule } from './movie/movie.module';
 import { CategorymovieModule } from './categorymovie/categorymovie.module';
 import { UserController } from './user/user.controller';
 import { MulterModule } from '@nestjs/platform-express';
-import { CategorymovieController } from './categorymovie/categorymovie.controller';
+import { CategoryMovieController } from './categorymovie/categorymovie.controller';
 
 @Module({
   imports: [
@@ -35,7 +35,7 @@ export class AppModule implements NestModule {
     consumer
       .apply(AuthRoleMiddleware)
       .exclude({ path: '/api/categories/do=all', method: RequestMethod.GET })
-      .forRoutes(CategorymovieController);
+      .forRoutes(CategoryMovieController);
     consumer
       .apply(AuthRoleMiddleware)
       .exclude({ path: '/api/user/do=current-user', method: RequestMethod.GET })

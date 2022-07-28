@@ -1,7 +1,6 @@
 import { HttpStatus, Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import { UserService } from '../user/user.service';
-import { JsonResponse } from '../helpers';
 import { UserDocument } from '../user/schemas/user.schema';
 import { Responses } from 'src/commons/response';
 

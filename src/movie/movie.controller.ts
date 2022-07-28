@@ -2,6 +2,7 @@ import {
   Controller,
   Delete,
   Get,
+  Patch,
   Post,
   Req,
   Res,
@@ -11,7 +12,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { MovieService } from './movie.service';
 import { Movie, MovieDocument } from './schema/movie.schema';
-import { idPrams } from './schema/movie.validate';
+import { buyMovieSchema, idPrams } from './schema/movie.validate';
 import { Request, Response } from 'express';
 import { JsonResponse } from '../helpers';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -30,12 +31,9 @@ import { BuyMovie, MovieSwagger, SearchMovie } from '../swagger';
 import { Responses } from 'src/commons/response';
 import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 import { log } from 'src/commons/logger';
-import { LevelLogger } from 'src/commons/consts/loger.const';
-
-export interface IResponse extends Request {
-  file: any;
-  user: any;
-}
+import { LevelLogger } from 'src/commons/consts/logger.const';
+import { IResponse } from 'src/commons/interface';
+import { v4 as uuidv4 } from 'uuid';
 
 @ApiTags('movie')
 @Controller('api')
@@ -47,9 +45,10 @@ export class MovieController extends Responses {
   @ApiParam({ name: 'id', type: 'string' })
   @Get('video/:id')
   async playVideoStream(@Req() req: Request, @Res() res: Response) {
-    const { id } = req.params;
-    const range = req.headers.range;
     try {
+      const { id } = req.params;
+      const { range } = req.headers;
+      await idPrams.validateAsync({ id });
       const dataResult = await this.movieService.playVideoStream(id, range);
       const { start, end, headers, videoPath } = dataResult;
       res.writeHead(206, headers);
@@ -66,6 +65,7 @@ export class MovieController extends Responses {
   async downloadFileReport(@Req() req: Request, @Res() res: Response) {
     try {
       const { id } = req.params;
+      await idPrams.validateAsync({ id });
       const movie: MovieDocument[] = await this.movieService.filterMovie({
         _id: id,
       });
@@ -89,6 +89,7 @@ export class MovieController extends Responses {
   async buyMovie(@Req() req: Request, @Res() res: Response) {
     try {
       const userId = (req as IResponse).user._id;
+      await buyMovieSchema.validateAsync(req.body);
       await this.movieService.buyMovie(req, userId);
       log(req, ResponseMessage.BUY_SUCCESS, LevelLogger.INFO);
       return this.responseJson(res, DoCode.BUY);
@@ -102,6 +103,7 @@ export class MovieController extends Responses {
   async getMovieById(@Req() req: Request, @Res() res: Response) {
     try {
       const { id } = req.params;
+      await idPrams.validateAsync({ id });
       const idUser = (req as IResponse).user;
       const movie = await this.movieService.getDetailMovie(id, idUser);
       const total = 1;
@@ -182,7 +184,8 @@ export class MovieController extends Responses {
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, callback) => {
-          const filename = file.originalname;
+          const idFile = uuidv4();
+          const filename = idFile + file.originalname;
           callback(null, filename);
         },
       }),
@@ -190,9 +193,9 @@ export class MovieController extends Responses {
   )
   async createMovie(@Req() req: Request, @Res() res: Response) {
     try {
-      const locationFileUpload = '../../Demo/demo-movie/uploads/';
+      const locationFileUpload = '../../Demo/demo-movie/';
       const renameFileUpload =
-        locationFileUpload + (req as IResponse).file.originalname;
+        locationFileUpload + (req as IResponse).file.path;
       const dataJson = JSON.parse(req.body.data);
       const userId = (req as IResponse).user._id;
       const reqFile = (req as IResponse).file;
@@ -227,5 +230,14 @@ export class MovieController extends Responses {
       log(req, error.message, LevelLogger.ERROR);
       return this.error(res, error);
     }
+  }
+
+  @ApiBearerAuth('auth')
+  @UseGuards(AuthGuard('auth'))
+  @Patch('movie/do=updateview/:id')
+  async updateViews(@Req() req: Request, @Res() res: Response) {
+    const { id } = req.params;
+    this.movieService.updateMovieService(id);
+    return this.responseJson(res, DoCode.UPDATE);
   }
 }

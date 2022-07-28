@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 export interface IResponseMessage {
   NOT_FOUND: string;
   FORBIDDEN: string;
@@ -34,4 +36,9 @@ export interface ILevel {
   ERROR: 'error';
   INFO: 'info';
   WARNING: 'warn';
+}
+
+export interface IResponse extends Request {
+  file: any;
+  user: any;
 }

@@ -21,7 +21,7 @@ import {
 import { UserSwagger } from '../swagger';
 import { Responses } from 'src/commons/response';
 import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
-import { LevelLogger } from 'src/commons/consts/loger.const';
+import { LevelLogger } from 'src/commons/consts/logger.const';
 import { log } from 'src/commons/logger';
 
 export interface ReqUser extends Request {

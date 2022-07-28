@@ -8,13 +8,14 @@ import {
   Patch,
   Get,
 } from '@nestjs/common';
-import { CategorymovieService } from './categorymovie.service';
+import { CategoryMovieService } from './categorymovie.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { CategoryMovie } from './schema/categorymovie.schema';
 import {
   createCategorySchema,
   paramsId,
+  updateCategorySchema,
 } from './schema/categorymovie.validate';
 import {
   ApiBearerAuth,
@@ -27,12 +28,12 @@ import { CategorySwagger } from 'src/swagger';
 import { Responses } from 'src/commons/response';
 import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 import { log } from 'src/commons/logger';
-import { LevelLogger } from 'src/commons/consts/loger.const';
+import { LevelLogger } from 'src/commons/consts/logger.const';
 
 @ApiTags('category')
 @Controller('api')
-export class CategorymovieController extends Responses {
-  constructor(private categoryService: CategorymovieService) {
+export class CategoryMovieController extends Responses {
+  constructor(private categoryService: CategoryMovieService) {
     super();
   }
 
@@ -108,7 +109,7 @@ export class CategorymovieController extends Responses {
     try {
       const { id } = req.params;
       const { body } = req;
-      await paramsId.validateAsync({ id });
+      await updateCategorySchema.validateAsync(req);
       await this.categoryService.updateCategory({ _id: id }, body, {
         new: true,
       });

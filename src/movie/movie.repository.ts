@@ -142,6 +142,14 @@ export class MovieRepository extends ErrorResponse {
     ]);
   }
 
+  updateMovie(
+    query: FilterQuery<CategoryMovieDocument>,
+    update: UpdateQuery<CategoryMovieDocument>,
+    options: QueryOptions,
+  ) {
+    return this.movieModel.findByIdAndUpdate(query, update, options);
+  }
+
   updateCategory(
     query: FilterQuery<CategoryMovieDocument>,
     update: UpdateQuery<CategoryMovieDocument>,

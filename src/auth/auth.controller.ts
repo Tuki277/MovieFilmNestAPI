@@ -10,9 +10,9 @@ import { Login, RefreshToken, UserSwagger } from 'src/swagger';
 import { UserDocument } from 'src/user/schemas/user.schema';
 import { AuthGuard } from '@nestjs/passport';
 import { Responses } from 'src/commons/response';
-import { DoCode } from 'src/commons/consts/response.const';
+import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 import { log } from 'src/commons/logger';
-import { LevelLogger } from 'src/commons/consts/loger.const';
+import { LevelLogger } from 'src/commons/consts/logger.const';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -52,7 +52,7 @@ export class AuthController extends Responses {
         },
         true,
       );
-      const jwt = this.jwtService.sign(payload);
+      const jwt: string = this.jwtService.sign(payload);
       return this.responseJson(res, DoCode.LOGIN, null, jwt, refreshToken);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
@@ -63,14 +63,16 @@ export class AuthController extends Responses {
   @Post('refresh-token')
   @ApiBody({ type: RefreshToken })
   async refreshToken(@Req() req: Request, @Res() res: Response) {
-    const refreshToken = req.body.refreshToken;
+    const { refreshToken } = req.body;
 
     const user: UserDocument = await this.userService.filterUser({
-      refreshToken: refreshToken,
+      refreshToken,
     });
 
     if (!user) {
-      return res.status(404).json(JsonResponse(false, 'not found'));
+      return res
+        .status(404)
+        .json(JsonResponse(false, ResponseMessage.NOT_FOUND));
     }
 
     try {
@@ -113,8 +115,8 @@ export class AuthController extends Responses {
         return this.responseJson(res, DoCode.CREATE);
       }
       return this.error(res, 'username is duplicated', true);
-    } catch (e) {
-      return this.error(res, e);
+    } catch (error) {
+      return this.error(res, error);
     }
   }
 

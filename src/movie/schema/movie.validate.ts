@@ -15,3 +15,10 @@ export const createMovieSchema = Joi.object({
 export const idPrams = Joi.object({
   id: Joi.string().min(24).required(),
 });
+
+export const buyMovieSchema = Joi.object({
+  email: Joi.string().email().required(),
+  amount: Joi.number().required().min(0),
+  movieId: Joi.string().required(),
+  currency: Joi.string().default('usd'),
+});

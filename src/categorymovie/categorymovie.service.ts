@@ -12,7 +12,7 @@ import {
 import { CategoryMovieRepository } from './categorymovie.repository';
 
 @Injectable()
-export class CategorymovieService {
+export class CategoryMovieService {
   constructor(private categoryMovieRepository: CategoryMovieRepository) {}
 
   createCategory(

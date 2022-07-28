@@ -11,7 +11,7 @@ import { CategoryMovie } from 'src/categorymovie/schema/categorymovie.schema';
 import { ErrorResponse } from 'src/commons/response/error';
 import { log } from 'src/commons/logger';
 import { ResponseMessage } from 'src/commons/consts/response.const';
-import { LevelLogger } from 'src/commons/consts/loger.const';
+import { LevelLogger } from 'src/commons/consts/logger.const';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2020-08-27',
@@ -63,7 +63,7 @@ export class MovieService extends ErrorResponse {
           );
           return movieCreated;
         }
-        this.errorRes('not found category');
+        this.errorRes('Not found category');
       }
       this.errorRes('File upload not empty');
     } catch (error) {
@@ -95,11 +95,11 @@ export class MovieService extends ErrorResponse {
           ) {
             return this.movieRepository.deleteMovie(id);
           }
-          throw new Error('forbidden');
+          throw new Error(ResponseMessage.FORBIDDEN);
         }
         return await this.movieRepository.deleteMovie(id);
       }
-      throw new Error('not found');
+      throw new Error(ResponseMessage.NOT_FOUND);
     } catch (error) {
       this.errorRes(error);
     }
@@ -182,7 +182,7 @@ export class MovieService extends ErrorResponse {
           watch: false,
         };
       }
-      this.errorRes('not found');
+      this.errorRes(ResponseMessage.NOT_FOUND);
     } catch (error) {
       this.errorRes(error);
     }
@@ -216,10 +216,10 @@ export class MovieService extends ErrorResponse {
             });
           }
           log(req, ResponseMessage.NOT_FOUND, LevelLogger.INFO);
-          this.errorRes('not found');
+          this.errorRes(ResponseMessage.NOT_FOUND);
         }
         log(req, ResponseMessage.BUY_FAIL, LevelLogger.WARNING);
-        this.errorRes('pay fail');
+        this.errorRes(ResponseMessage.BUY_FAIL);
       }
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
@@ -230,6 +230,23 @@ export class MovieService extends ErrorResponse {
   async getAllMovie() {
     try {
       return await this.movieRepository.getCountMovie();
+    } catch (error) {
+      this.errorRes(error);
+    }
+  }
+
+  async updateMovieService(id: string) {
+    try {
+      let views = 0;
+      const findMovie = await this.movieRepository.filterMovie({
+        _id: id,
+      });
+      views = findMovie[0].views + 1;
+      return await this.movieRepository.updateMovie(
+        { _id: id },
+        { views },
+        { new: true },
+      );
     } catch (error) {
       this.errorRes(error);
     }
