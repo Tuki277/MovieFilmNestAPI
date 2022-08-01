@@ -32,7 +32,7 @@ import { Responses } from 'src/commons/response';
 import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 import { log } from 'src/commons/logger';
 import { LevelLogger } from 'src/commons/consts/logger.const';
-import { IResponse } from 'src/commons/interface';
+import { IDataResponse, IResponse } from 'src/commons/interface';
 import { v4 as uuidv4 } from 'uuid';
 
 @ApiTags('movie')
@@ -163,7 +163,7 @@ export class MovieController extends Responses {
       const dataRes: Movie[] = await this.movieService.filterMovie({
         authorCreated: userId._id,
       });
-      const data = {
+      const data: IDataResponse<Movie[]> = {
         dataRes,
         total: null,
       };
@@ -193,14 +193,14 @@ export class MovieController extends Responses {
   )
   async createMovie(@Req() req: Request, @Res() res: Response) {
     try {
-      const locationFileUpload = process.env.PATH_SAVE_DB;
-      const renameFileUpload =
+      const locationFileUpload: string = process.env.PATH_SAVE_DB;
+      const renameFileUpload: string =
         locationFileUpload + (req as IResponse).file.path;
       const dataJson = JSON.parse(req.body.data);
       const userId = (req as IResponse).user._id;
       const reqFile = (req as IResponse).file;
       const categoryId = dataJson.categoryMovie;
-      const dataAdd = await this.movieService.createMovie(
+      const dataAdd: Movie = await this.movieService.createMovie(
         dataJson,
         userId,
         renameFileUpload,

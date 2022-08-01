@@ -29,6 +29,7 @@ import { Responses } from 'src/commons/response';
 import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 import { log } from 'src/commons/logger';
 import { LevelLogger } from 'src/commons/consts/logger.const';
+import { IDataResponse } from 'src/commons/interface';
 
 @ApiTags('category')
 @Controller('api')
@@ -45,7 +46,7 @@ export class CategoryMovieController extends Responses {
       const dataRes: CategoryMovie[] =
         await this.categoryService.getAllCategory(req.query);
       const total = await this.categoryService.getCountCategory();
-      const data = {
+      const data: IDataResponse<CategoryMovie[]> = {
         dataRes,
         total,
       };

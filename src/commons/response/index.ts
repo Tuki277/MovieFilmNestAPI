@@ -22,7 +22,7 @@ export class Responses extends BaseResponse {
     }
   }
 
-  error(res, error, options?: boolean) {
+  error(res: Response, error: any, options?: boolean) {
     if (error && error.isJoi) {
       return this.responseError(
         res,

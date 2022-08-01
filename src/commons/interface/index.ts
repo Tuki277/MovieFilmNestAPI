@@ -42,3 +42,8 @@ export interface IResponse extends Request {
   file: any;
   user: any;
 }
+
+export interface IDataResponse<T> {
+  dataRes: T;
+  total: number;
+}

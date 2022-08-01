@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import {
   JsonResponse,
   processDoCode,
@@ -6,7 +7,7 @@ import {
 
 export class BaseResponse {
   response = (
-    res,
+    res: Response,
     doCode: number,
     statusState: boolean,
     total?: number,
