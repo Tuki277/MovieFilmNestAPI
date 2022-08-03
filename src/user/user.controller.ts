@@ -6,6 +6,7 @@ import {
   Delete,
   Put,
   UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Request, Response } from 'express';
@@ -19,18 +20,18 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserSwagger } from '../swagger';
-import { Responses } from 'src/commons/response';
-import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 import { LevelLogger } from 'src/commons/consts/logger.const';
 import { log } from 'src/commons/logger';
+import { BaseResponse } from 'src/commons/base/base.response';
+import { IPaging } from 'src/commons/interface';
 
 export interface ReqUser extends Request {
   user: any;
 }
 
 @ApiTags('user')
-@Controller('api')
-export class UserController extends Responses {
+@Controller('user')
+export class UserController extends BaseResponse {
   constructor(private userService: UserService) {
     super();
   }
@@ -39,29 +40,37 @@ export class UserController extends Responses {
   @UseGuards(AuthGuard('auth'))
   @ApiQuery({ name: 'rowPerPage', type: Number, required: false })
   @ApiQuery({ name: 'page', type: Number, required: false })
-  @Get('user/do=all')
+  @Get()
   async getAllUser(@Req() req: Request, @Res() res: Response) {
     try {
-      const dataRes = await this.userService.getAllUser(
+      const reqQuery: IPaging = {
+        page: req.query.page ? parseInt(req.query.page.toString()) : null,
+        rowPerPage: req.query.rowPerPage
+          ? parseInt(req.query.rowPerPage.toString())
+          : null,
+      };
+
+      console.log((req as ReqUser).user.role);
+      const dataResult = await this.userService.getAllUser(
         (req as ReqUser).user.role,
-        req.query,
+        reqQuery,
       );
       const total = await this.userService.getCountUser();
-      const data = {
-        dataRes,
-        total,
-      };
-      log(req, ResponseMessage.OK, LevelLogger.INFO);
-      return this.responseJson(res, DoCode.GET, data);
+      log(req, '=== OK ===', LevelLogger.INFO);
+      return this.responseMessage(res, HttpStatus.OK, total, dataResult);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(
+        res,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message,
+      );
     }
   }
 
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
-  @Get('user/do=current-user')
+  @Get('current-user')
   async getCurrentUser(@Req() req: Request, @Res() res: Response) {
     try {
       let data = null;
@@ -71,7 +80,6 @@ export class UserController extends Responses {
       if (user.role === 1 || user.role === 2) {
         dataRes = {
           ...user,
-          movieUpload: user.movie.length,
           permission: true,
         };
         data = {
@@ -81,7 +89,6 @@ export class UserController extends Responses {
       } else {
         dataRes = {
           ...user,
-          movieUpload: user.movie.length,
           permission: false,
         };
         data = {
@@ -90,26 +97,31 @@ export class UserController extends Responses {
         };
       }
 
-      return this.responseJson(res, DoCode.GET, data);
+      return this.responseMessage(res, HttpStatus.OK, total, dataRes);
     } catch (error) {
-      return this.error(res, error);
+      return this.responseError(
+        res,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message,
+      );
     }
   }
 
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
   @ApiParam({ name: 'id', type: 'string' })
-  @Delete('user/do=delete/:id')
+  @Delete(':id')
   async deleteUser(@Req() req: Request, @Res() res: Response) {
     try {
       const id: string = req.params.id;
-      const dataResult: User = await this.userService.deleteUser(id);
-      if (dataResult) {
-        return this.responseJson(res, DoCode.DELETE);
-      }
-      return this.responseJson(res, DoCode.NOT_FOUND);
+      await this.userService.deleteUser(id);
+      return this.responseNoContent(res, HttpStatus.OK);
     } catch (error) {
-      return this.error(res, error);
+      return this.responseError(
+        res,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message,
+      );
     }
   }
 
@@ -117,16 +129,20 @@ export class UserController extends Responses {
   @UseGuards(AuthGuard('auth'))
   @ApiBody({ type: UserSwagger })
   @ApiParam({ name: 'id', type: 'string' })
-  @Put('user/do=edit/:id')
+  @Put(':id')
   async putUser(@Req() req: Request, @Res() res: Response) {
     try {
       const id: string = req.params.id;
       const body: UserDocument = req.body;
 
       await this.userService.updateUser({ _id: id }, body);
-      return this.responseJson(res, DoCode.UPDATE);
+      return this.responseNoContent(res, HttpStatus.OK);
     } catch (error) {
-      return this.error(res, error);
+      return this.responseError(
+        res,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message,
+      );
     }
   }
 }

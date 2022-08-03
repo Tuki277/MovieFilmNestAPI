@@ -2,10 +2,10 @@ import { HttpStatus, Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import { UserService } from '../user/user.service';
 import { UserDocument } from '../user/schemas/user.schema';
-import { Responses } from 'src/commons/response';
+import { BaseResponse } from 'src/commons/base/base.response';
 
 @Injectable()
-export class AuthRoleMiddleware extends Responses implements NestMiddleware {
+export class AuthRoleMiddleware extends BaseResponse implements NestMiddleware {
   constructor(private userService: UserService) {
     super();
   }
@@ -15,13 +15,13 @@ export class AuthRoleMiddleware extends Responses implements NestMiddleware {
       _id: idUser,
     });
     if (!userResult) {
-      return this.error(res, HttpStatus.UNAUTHORIZED);
+      return this.responseNoContent(res, HttpStatus.UNAUTHORIZED);
     } else {
       if (userResult.role === 1 || userResult.role === 2) {
         next();
         return;
       } else {
-        return this.error(res, HttpStatus.FORBIDDEN);
+        return this.responseNoContent(res, HttpStatus.FORBIDDEN);
       }
     }
   }

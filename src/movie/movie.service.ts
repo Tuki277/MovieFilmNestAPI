@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { FilterQuery } from 'mongoose';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { Aggregate, FilterQuery } from 'mongoose';
 import { Movie, MovieDocument } from './schema/movie.schema';
 import { MovieRepository } from './movie.repository';
 import * as fs from 'fs';
@@ -8,17 +8,16 @@ import { confirmUserCreated, getDateTimeNow } from 'src/helpers';
 import { UserRepository } from 'src/user/user.repository';
 import { Stripe } from 'stripe';
 import { CategoryMovie } from 'src/categorymovie/schema/categorymovie.schema';
-import { ErrorResponse } from 'src/commons/response/error';
 import { log } from 'src/commons/logger';
-import { ResponseMessage } from 'src/commons/consts/response.const';
 import { LevelLogger } from 'src/commons/consts/logger.const';
+import { BaseResponse } from 'src/commons/base/base.response';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2020-08-27',
 });
 
 @Injectable()
-export class MovieService extends ErrorResponse {
+export class MovieService extends BaseResponse {
   constructor(
     private movieRepository: MovieRepository,
     private userRepository: UserRepository,
@@ -49,7 +48,7 @@ export class MovieService extends ErrorResponse {
           const user: User = await this.userRepository.filterUser({
             _id: userId,
           });
-          user.movie.push(movieCreated);
+          user.movieUpload += 1;
           await this.userRepository.updateUser({ _id: userId }, user, {
             new: true,
           });
@@ -63,19 +62,24 @@ export class MovieService extends ErrorResponse {
           );
           return movieCreated;
         }
-        this.errorRes('Not found category');
+        this.throwError('Not found category', HttpStatus.NOT_FOUND);
       }
-      this.errorRes('File upload not empty');
+      this.throwError('File upload not empty', HttpStatus.BAD_REQUEST);
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async deleteMovie(id: string) {
     try {
-      return this.movieRepository.deleteMovie(id);
+      const movieDoesItExist: Aggregate<Movie[]> =
+        this.movieRepository.filterMovie({ id });
+      if ((await movieDoesItExist).length > 0) {
+        return this.movieRepository.deleteMovie(id);
+      }
+      this.throwError('Not Found', HttpStatus.NOT_FOUND);
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -95,18 +99,22 @@ export class MovieService extends ErrorResponse {
           ) {
             return this.movieRepository.deleteMovie(id);
           }
-          throw new Error(ResponseMessage.FORBIDDEN);
+          this.throwError('Forbidden', HttpStatus.FORBIDDEN);
         }
         return await this.movieRepository.deleteMovie(id);
       }
-      throw new Error(ResponseMessage.NOT_FOUND);
+      this.throwError('Not found', HttpStatus.NOT_FOUND);
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async filterMovie(query: FilterQuery<MovieDocument>) {
-    return this.movieRepository.filterMovie(query);
+    try {
+      return await this.movieRepository.filterMovie(query);
+    } catch (error) {
+      this.throwError(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async getMovie(reqQuery) {
@@ -123,7 +131,7 @@ export class MovieService extends ErrorResponse {
         body,
       );
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -157,7 +165,7 @@ export class MovieService extends ErrorResponse {
         end,
       };
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -182,9 +190,9 @@ export class MovieService extends ErrorResponse {
           watch: false,
         };
       }
-      this.errorRes(ResponseMessage.NOT_FOUND);
+      this.throwError('Not found', HttpStatus.NOT_FOUND);
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -215,15 +223,15 @@ export class MovieService extends ErrorResponse {
               new: true,
             });
           }
-          log(req, ResponseMessage.NOT_FOUND, LevelLogger.INFO);
-          this.errorRes(ResponseMessage.NOT_FOUND);
+          log(req, '=== Not found === ', LevelLogger.INFO);
+          this.throwError('Not found', HttpStatus.NOT_FOUND);
         }
-        log(req, ResponseMessage.BUY_FAIL, LevelLogger.WARNING);
-        this.errorRes(ResponseMessage.BUY_FAIL);
+        log(req, '=== Buy fail ===', LevelLogger.WARNING);
+        this.throwError('Buy fail', HttpStatus.BAD_REQUEST);
       }
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -231,7 +239,7 @@ export class MovieService extends ErrorResponse {
     try {
       return await this.movieRepository.getCountMovie();
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -248,7 +256,7 @@ export class MovieService extends ErrorResponse {
         { new: true },
       );
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

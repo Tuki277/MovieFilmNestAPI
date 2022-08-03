@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import {
   CategoryMovie,
   CategoryMovieDocument,
@@ -10,23 +10,38 @@ import {
   UpdateQuery,
 } from 'mongoose';
 import { CategoryMovieRepository } from './categorymovie.repository';
+import { BaseResponse } from 'src/commons/base/base.response';
 
 @Injectable()
-export class CategoryMovieService {
-  constructor(private categoryMovieRepository: CategoryMovieRepository) {}
+export class CategoryMovieService extends BaseResponse {
+  constructor(private categoryMovieRepository: CategoryMovieRepository) {
+    super();
+  }
 
-  createCategory(
+  async createCategory(
     input: DocumentDefinition<CategoryMovieDocument>,
   ): Promise<CategoryMovie> {
-    return this.categoryMovieRepository.createCategory(input);
+    try {
+      return this.categoryMovieRepository.createCategory(input);
+    } catch (error) {
+      this.throwError(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
-  getCountCategory() {
-    return this.categoryMovieRepository.getCountCategory();
+  async getCountCategory() {
+    try {
+      return this.categoryMovieRepository.getCountCategory();
+    } catch (error) {
+      this.throwError(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
-  getAllCategory(reqBody): Promise<CategoryMovie[]> {
-    return this.categoryMovieRepository.getAllCategory(reqBody);
+  async getAllCategory(reqBody): Promise<CategoryMovie[]> {
+    try {
+      return this.categoryMovieRepository.getAllCategory(reqBody);
+    } catch (error) {
+      this.throwError(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   filterCategory(
@@ -36,15 +51,36 @@ export class CategoryMovieService {
     return this.categoryMovieRepository.filterCategory(query, options);
   }
 
-  updateCategory(
+  async updateCategory(
     query: FilterQuery<CategoryMovieDocument>,
     update: UpdateQuery<CategoryMovieDocument>,
     options: QueryOptions,
   ): Promise<CategoryMovie> {
-    return this.categoryMovieRepository.updateCategory(query, update, options);
+    try {
+      const dataResult = await this.filterCategory(query, { lean: true });
+      console.log({ dataResult });
+      if (dataResult) {
+        return this.categoryMovieRepository.updateCategory(
+          query,
+          update,
+          options,
+        );
+      }
+      this.throwError('Not found', HttpStatus.NOT_FOUND);
+    } catch (error) {
+      this.throwError(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
-  deleteCategory(id: string) {
-    return this.categoryMovieRepository.deleteCategory(id);
+  async deleteCategory(id: string) {
+    try {
+      const dataResult = await this.filterCategory({ _id: id }, { lean: true });
+      if (dataResult) {
+        return this.categoryMovieRepository.deleteCategory(id);
+      }
+      this.throwError('Not found', HttpStatus.NOT_FOUND);
+    } catch (error) {
+      this.throwError(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 }

@@ -1,10 +1,8 @@
-import { HttpStatus } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 
 export const hashPassword = async (password: string) => {
   try {
-    const salt = await bcrypt.genSalt(parseInt(process.env.SALTWORKFACTOR));
+    const salt = await bcrypt.genSalt(parseInt(process.env.SALT_WORK_FACTOR));
     const hash = await bcrypt.hashSync(password, salt);
     return hash;
   } catch (error) {
@@ -12,48 +10,17 @@ export const hashPassword = async (password: string) => {
   }
 };
 
-export const processDoCode = (doCode: number): number => {
-  return doCode === DoCode.GET || DoCode.UPDATE || DoCode.DELETE || DoCode.BUY
-    ? HttpStatus.OK
-    : doCode === DoCode.CREATE
-    ? HttpStatus.CREATED
-    : HttpStatus.NOT_FOUND;
-};
-
-export const processResponseMessage = (doCode: number): string => {
-  switch (doCode) {
-    case DoCode.CREATE:
-      return ResponseMessage.CREATED;
-    case DoCode.GET:
-      return ResponseMessage.OK;
-    case DoCode.UPDATE:
-      return ResponseMessage.UPDATED;
-    case DoCode.DELETE:
-      return ResponseMessage.DELETED;
-    case DoCode.NOT_FOUND:
-      return ResponseMessage.NOT_FOUND;
-    case DoCode.BUY:
-      return ResponseMessage.BUY_SUCCESS;
-  }
-};
-
-export const JsonResponse = (
-  error: boolean,
-  message: string,
+export const JsonResponse = <T>(
   total?: number,
-  data?: any,
+  result?: T,
   accessToken?: string,
   refreshToken?: string,
 ) => {
   return {
-    result: {
-      error,
-      message,
-      total,
-      data,
-      accessToken,
-      refreshToken,
-    },
+    total,
+    result,
+    accessToken,
+    refreshToken,
   };
 };
 
@@ -72,3 +39,13 @@ export const confirmUserCreated = (idUser: string, idPrams: string) => {
   }
   return false;
 };
+
+export function cleanObject(obj: any) {
+  for (const key in obj) {
+    if (obj[key] === null) {
+      delete obj[key];
+    }
+  }
+
+  return obj;
+}

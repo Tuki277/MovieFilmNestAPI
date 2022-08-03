@@ -24,17 +24,17 @@ export class User {
   @Prop({ default: 3 }) //1: super admin, 2: admin, 3: user
   role: number;
 
+  @Prop({ default: 'local', enum: ['local', 'google'] })
+  authType: string;
+
   @Prop()
   refreshToken: string;
 
   @Prop({ default: 0 })
   movieView: number;
 
-  @Prop([
-    { type: mongoose.Schema.Types.ObjectId, ref: 'movie' },
-    { default: [] },
-  ])
-  movie: Movie[];
+  @Prop({ default: 0 })
+  movieUpload: number;
 
   @Prop([
     { type: mongoose.Schema.Types.ObjectId, ref: 'movie' },

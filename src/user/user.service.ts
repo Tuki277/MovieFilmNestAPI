@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose';
-import { ErrorResponse } from 'src/commons/response/error';
+import { BaseResponse } from 'src/commons/base/base.response';
+import { IPaging } from 'src/commons/interface';
 import { hashPassword } from 'src/helpers';
 import { User, UserDocument } from './schemas/user.schema';
 import { UserRepository } from './user.repository';
 
 @Injectable()
-export class UserService extends ErrorResponse {
+export class UserService extends BaseResponse {
   constructor(private userRepository: UserRepository) {
     super();
   }
@@ -19,13 +20,13 @@ export class UserService extends ErrorResponse {
         password: passwordHash,
       });
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.BAD_REQUEST);
     }
   }
 
   async checkUsernameDuplicated(reqBody: User): Promise<boolean> {
     try {
-      const dataResult = await this.userRepository.filterUser({
+      const dataResult: UserDocument = await this.userRepository.filterUser({
         username: reqBody.username,
       });
       if (!dataResult) {
@@ -33,23 +34,29 @@ export class UserService extends ErrorResponse {
       }
       return false;
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
-  async getAllUser(role: number, reqQuery): Promise<User[]> {
+  async getAllUser(role: number, reqQuery: IPaging): Promise<User[]> {
     try {
       return await this.userRepository.getAllUser(role, reqQuery);
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
   async deleteUser(id: string): Promise<User> {
     try {
-      return await this.userRepository.deleteUser(id);
+      const userFound: UserDocument = await this.userRepository.filterUser({
+        _id: id,
+      });
+      if (userFound) {
+        return await this.userRepository.deleteUser(id);
+      }
+      this.throwError('Not found', HttpStatus.NOT_FOUND);
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -60,38 +67,38 @@ export class UserService extends ErrorResponse {
     try {
       return await this.userRepository.filterUser(query, options);
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
   async updateUser(
     query: FilterQuery<UserDocument>,
     update: UpdateQuery<UserDocument>,
-    login?: boolean,
+    bypass?: boolean,
   ) {
     try {
       const dataResult: User = await this.userRepository.filterUser(query);
       if (dataResult) {
-        if (update.username !== '') {
-          if (!login) {
+        if (!bypass) {
+          if (update.username !== dataResult.username) {
             const password = await hashPassword(update.password);
-            const dataUpdateBody = {
+            const dataUpdate = {
               ...update,
               password,
             };
-            return await this.userRepository.updateUser(query, dataUpdateBody, {
+            return await this.userRepository.updateUser(query, dataUpdate, {
               new: true,
             });
           }
-          return await this.userRepository.updateUser(query, update, {
-            new: true,
-          });
+          this.throwError('Not edit username', HttpStatus.BAD_REQUEST);
         }
-        this.errorRes('username is not edit');
+        return await this.userRepository.updateUser(query, update, {
+          new: true,
+        });
       }
-      this.errorRes('not found');
+      this.throwError('Not found', HttpStatus.NOT_FOUND);
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -99,7 +106,7 @@ export class UserService extends ErrorResponse {
     try {
       return this.userRepository.getCountUser();
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 }

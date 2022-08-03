@@ -1,22 +1,5 @@
 import { Request } from 'express';
 
-export interface IResponseMessage {
-  NOT_FOUND: string;
-  FORBIDDEN: string;
-  OK: string;
-  UNKNOWN_ERROR: string;
-  CREATED: string;
-  UPDATED: string;
-  DELETED: string;
-  QUERY_SUCCESS: string;
-  BUY_SUCCESS: string;
-  BUY_FAIL: string;
-  DOWNLOAD_SUCCESS: string;
-  UNAUTHORIZED: string;
-  LOGIN_SUCCESS: string;
-  LOGIN_FAIL: string;
-}
-
 export interface IDoCode {
   GET: number;
   DELETE: number;
@@ -43,7 +26,7 @@ export interface IResponse extends Request {
   user: any;
 }
 
-export interface IDataResponse<T> {
-  dataRes: T;
-  total: number;
+export interface IGoogleOauth {
+  sub: string;
+  email: string;
 }

@@ -1,33 +1,29 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
-import {
-  JsonResponse,
-  processDoCode,
-  processResponseMessage,
-} from 'src/helpers';
+import { cleanObject, JsonResponse } from 'src/helpers';
 
 export class BaseResponse {
-  response = (
+  responseNoContent = (res: Response, statusCode: HttpStatus) =>
+    res.status(statusCode).send();
+
+  responseError = (res: Response, statusCode: HttpStatus, error: any) =>
+    res.status(statusCode).send(error);
+
+  responseMessage = <T>(
     res: Response,
-    doCode: number,
-    statusState: boolean,
-    total?: number,
-    data?: any,
-    access_token?: string,
-    refresh_token?: string,
+    statusCode: HttpStatus,
+    total?: number | null,
+    data?: T | null,
+    access_token?: string | null,
+    refresh_token?: string | null,
   ) =>
     res
-      .status(processDoCode(doCode))
+      .status(statusCode)
       .json(
-        JsonResponse(
-          statusState,
-          processResponseMessage(doCode),
-          total,
-          data,
-          access_token,
-          refresh_token,
-        ),
+        cleanObject(JsonResponse(total, data, access_token, refresh_token)),
       );
 
-  responseError = (res, httpStatus, message) =>
-    res.status(httpStatus).json(JsonResponse(true, message));
+  throwError = (error: any, statusCode: HttpStatus) => {
+    throw new HttpException(error, statusCode);
+  };
 }

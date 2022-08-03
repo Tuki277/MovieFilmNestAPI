@@ -1,22 +1,14 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { User, UserDocument } from './../user/schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
-import { ErrorResponse } from 'src/commons/response/error';
-
-export interface IGoogleOauth {
-  sub: string;
-  email: string;
-}
+import { BaseResponse } from 'src/commons/base/base.response';
+import { IGoogleOauth } from 'src/commons/interface';
 
 @Injectable()
-export class AuthService extends ErrorResponse {
+export class AuthService extends BaseResponse {
   constructor(
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
@@ -29,16 +21,13 @@ export class AuthService extends ErrorResponse {
     const user: UserDocument = await this.userModel.findOne({
       username: users.username,
     });
-
     if (!user) {
       return false;
     }
     const isValid = await bcrypt.compare(candidatePassword, user.password);
-
     if (!isValid) {
       return false;
     }
-
     return true;
   }
 
@@ -50,7 +39,7 @@ export class AuthService extends ErrorResponse {
     };
     return {
       access_token: this.jwtService.sign(payload, {
-        expiresIn: process.env.EXPIRESIN_REFRESHTOKEN,
+        expiresIn: process.env.EXPIRES_IN_REFRESH_TOKEN,
       }),
     };
   }
@@ -59,7 +48,7 @@ export class AuthService extends ErrorResponse {
     try {
       return this.jwtService.verify(token);
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -67,7 +56,7 @@ export class AuthService extends ErrorResponse {
     try {
       return await this.verifyToken(token);
     } catch (error) {
-      this.errorRes(error);
+      this.throwError(error, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -86,8 +75,9 @@ export class AuthService extends ErrorResponse {
     });
 
     if (user.length > 0) {
-      throw new ForbiddenException(
+      this.throwError(
         "User already exists, but Google account was not connected to user's account",
+        HttpStatus.BAD_REQUEST,
       );
     }
     try {
@@ -99,7 +89,7 @@ export class AuthService extends ErrorResponse {
       this.userModel.create(newUser);
       return this.login(newUser);
     } catch (error) {
-      throw new Error(error);
+      this.throwError(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

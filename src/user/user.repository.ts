@@ -8,6 +8,7 @@ import {
   UpdateQuery,
 } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
+import { IPaging } from '../commons/interface/index';
 
 @Injectable()
 export class UserRepository {
@@ -17,35 +18,17 @@ export class UserRepository {
     return this.userModel.create(input);
   }
 
-  getAllUser(role: number, reqQuery) {
-    const page = parseInt(reqQuery.page);
-    const rowPerPage = parseInt(reqQuery.rowPerPage);
-    return this.userModel.aggregate([
-      { $match: { role: { $gte: role } } },
-      {
-        $project: {
-          username: 1,
-          fullname: 1,
-          age: 1,
-          address: 1,
-          movieView: 1,
-          movie: 1,
-          role: 1,
-          createdAt: 1,
-          movieUpload: {
-            $cond: {
-              if: { $isArray: '$movie' },
-              then: { $size: '$movie' },
-              else: 0,
-            },
-          },
-        },
-      },
-      {
-        $skip: page ? page * rowPerPage - rowPerPage : 0,
-      },
-      { $limit: rowPerPage ? rowPerPage : 100 },
-    ]);
+  getAllUser(role: number, reqQuery: IPaging) {
+    const page = reqQuery.page;
+    const rowPerPage = reqQuery.rowPerPage;
+    console.log(reqQuery);
+    const dataRes = this.userModel
+      .find({
+        role: { $gte: role },
+      })
+      .skip(page ? page * rowPerPage - rowPerPage : 0)
+      .limit(rowPerPage ? rowPerPage : 100);
+    return dataRes;
   }
 
   deleteUser(id: string) {

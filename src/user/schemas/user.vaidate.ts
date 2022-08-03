@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
 
-export const registerSchema = Joi.object({
+export const registerValidate = Joi.object({
   username: Joi.string().required(),
   fullname: Joi.string().required(),
   password: Joi.string().required(),

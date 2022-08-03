@@ -10,6 +10,8 @@ async function bootstrap() {
   });
   app.enableCors();
 
+  app.setGlobalPrefix('api');
+
   app.useStaticAssets(join(__dirname, '..', 'static'));
 
   const config = new DocumentBuilder()

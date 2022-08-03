@@ -31,10 +31,10 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {
     consumer
       .apply(GetAccessTokenMiddleware)
-      .forRoutes({ path: '/api/*', method: RequestMethod.ALL });
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
     consumer
       .apply(AuthRoleMiddleware)
-      .exclude({ path: '/api/categories/do=all', method: RequestMethod.GET })
+      .exclude({ path: '/api/categories', method: RequestMethod.GET })
       .forRoutes(CategoryMovieController);
     consumer
       .apply(AuthRoleMiddleware)

@@ -14,10 +14,10 @@ import {
 import { Movie, MovieDocument } from './schema/movie.schema';
 import * as fs from 'fs';
 import { User, UserDocument } from '../user/schemas/user.schema';
-import { ErrorResponse } from 'src/commons/response/error';
+import { BaseResponse } from 'src/commons/base/base.response';
 
 @Injectable()
-export class MovieRepository extends ErrorResponse {
+export class MovieRepository extends BaseResponse {
   constructor(
     @InjectModel(Movie.name) private movieModel: Model<MovieDocument>,
     @InjectModel(CategoryMovie.name)
@@ -32,22 +32,18 @@ export class MovieRepository extends ErrorResponse {
   }
 
   async deleteMovie(id: string) {
-    try {
-      const movie: MovieDocument = await this.movieModel.findById(id);
-      const fileLocation = movie.filmLocation;
-      fs.unlinkSync(fileLocation);
-      await this.categoryModel.findByIdAndUpdate(
-        { _id: movie.categoryMovie },
-        { $pull: { movie: movie._id.toString() } },
-      );
-      await this.userModel.findByIdAndUpdate(
-        { _id: movie.authorCreated },
-        { $pull: { movie: movie._id.toString() } },
-      );
-      return this.movieModel.findByIdAndRemove(id);
-    } catch (error) {
-      this.errorRes(error);
-    }
+    const movie: MovieDocument = await this.movieModel.findById(id);
+    const fileLocation = movie.filmLocation;
+    fs.unlinkSync(fileLocation);
+    await this.categoryModel.findByIdAndUpdate(
+      { _id: movie.categoryMovie },
+      { $pull: { movie: movie._id.toString() } },
+    );
+    await this.userModel.findByIdAndUpdate(
+      { _id: movie.authorCreated },
+      { $pull: { movie: movie._id.toString() } },
+    );
+    return this.movieModel.findByIdAndRemove(id);
   }
 
   filterMovie(

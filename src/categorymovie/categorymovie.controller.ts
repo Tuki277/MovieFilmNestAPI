@@ -7,6 +7,7 @@ import {
   Delete,
   Patch,
   Get,
+  HttpStatus,
 } from '@nestjs/common';
 import { CategoryMovieService } from './categorymovie.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -25,43 +26,37 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CategorySwagger } from 'src/swagger';
-import { Responses } from 'src/commons/response';
-import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 import { log } from 'src/commons/logger';
 import { LevelLogger } from 'src/commons/consts/logger.const';
-import { IDataResponse } from 'src/commons/interface';
+import { BaseResponse } from 'src/commons/base/base.response';
 
 @ApiTags('category')
-@Controller('api')
-export class CategoryMovieController extends Responses {
+@Controller('categories')
+export class CategoryMovieController extends BaseResponse {
   constructor(private categoryService: CategoryMovieService) {
     super();
   }
 
-  @Get('categories/do=all')
+  @Get()
   @ApiQuery({ name: 'rowPerPage', type: Number, required: false })
   @ApiQuery({ name: 'page', type: Number, required: false })
   async getAllCategories(@Req() req: Request, @Res() res: Response) {
     try {
-      const dataRes: CategoryMovie[] =
+      const dataResult: CategoryMovie[] =
         await this.categoryService.getAllCategory(req.query);
       const total = await this.categoryService.getCountCategory();
-      const data: IDataResponse<CategoryMovie[]> = {
-        dataRes,
-        total,
-      };
-      log(req, ResponseMessage.QUERY_SUCCESS, LevelLogger.INFO);
-      return this.responseJson(res, DoCode.GET, data);
+      log(req, '=== OK ===', LevelLogger.INFO);
+      return this.responseMessage(res, HttpStatus.OK, total, dataResult);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, error.status, error.message);
     }
   }
 
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
   @ApiBody({ type: CategorySwagger })
-  @Post('categories/do=add')
+  @Post()
   async createCategory(@Req() req: Request, @Res() res: Response) {
     try {
       await createCategorySchema.validateAsync({
@@ -70,41 +65,41 @@ export class CategoryMovieController extends Responses {
         //@ts-ignore
         userCreated: req.user._id.toString(),
       });
-      const category = await this.categoryService.createCategory({
+      await this.categoryService.createCategory({
         ...req.body,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         userCreated: req.user._id.toString(),
       });
-      log(req, ResponseMessage.CREATED, LevelLogger.INFO);
-      return this.responseJson(res, DoCode.CREATE, category);
+      log(req, '=== Created ===', LevelLogger.INFO);
+      return this.responseNoContent(res, HttpStatus.CREATED);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, error.status, error.message);
     }
   }
 
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
-  @Delete('categories/do=delete/:id')
+  @Delete(':id')
   @ApiParam({ name: 'id', type: 'string' })
   async deleteCategory(@Req() req: Request, @Res() res: Response) {
     try {
       const { id } = req.params;
       await paramsId.validateAsync({ id });
       await this.categoryService.deleteCategory(id);
-      log(req, ResponseMessage.DELETED, LevelLogger.INFO);
-      return this.responseJson(res, DoCode.DELETE);
+      log(req, '=== Deleted ===', LevelLogger.INFO);
+      return this.responseNoContent(res, HttpStatus.OK);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, error.status, error.message);
     }
   }
 
   @ApiBearerAuth('auth')
   @UseGuards(AuthGuard('auth'))
   @ApiBody({ type: CategorySwagger })
-  @Patch('categories/do=edit/:id')
+  @Patch(':id')
   @ApiParam({ name: 'id', type: 'string' })
   async updateCategory(@Req() req: Request, @Res() res: Response) {
     try {
@@ -114,11 +109,12 @@ export class CategoryMovieController extends Responses {
       await this.categoryService.updateCategory({ _id: id }, body, {
         new: true,
       });
-      log(req, ResponseMessage.UPDATED, LevelLogger.INFO);
-      return this.responseJson(res, DoCode.UPDATE);
+      log(req, '=== Updated ===', LevelLogger.INFO);
+      return this.responseNoContent(res, HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, error.status, error.message);
     }
   }
 }

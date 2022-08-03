@@ -16,7 +16,7 @@ import { UserRepository } from 'src/user/user.repository';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: process.env.EXPIRESIN_ACESSTOKEN },
+      signOptions: { expiresIn: process.env.EXPIRES_IN_ACCESS_TOKEN },
     }),
     PassportModule,
   ],

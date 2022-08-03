@@ -12,10 +12,10 @@ import {
   UpdateQuery,
 } from 'mongoose';
 import { MovieService } from '../movie/movie.service';
-import { ErrorResponse } from 'src/commons/response/error';
+import { BaseResponse } from 'src/commons/base/base.response';
 
 @Injectable()
-export class CategoryMovieRepository extends ErrorResponse {
+export class CategoryMovieRepository extends BaseResponse {
   constructor(
     @InjectModel(CategoryMovie.name)
     private categoryModel: Model<CategoryMovieDocument>,
@@ -27,11 +27,7 @@ export class CategoryMovieRepository extends ErrorResponse {
   async createCategory(
     input: DocumentDefinition<CategoryMovieDocument>,
   ): Promise<CategoryMovie> {
-    try {
-      return await this.categoryModel.create(input);
-    } catch (error) {
-      this.errorRes(error);
-    }
+    return await this.categoryModel.create(input);
   }
 
   async getCountCategory() {
@@ -39,44 +35,36 @@ export class CategoryMovieRepository extends ErrorResponse {
   }
 
   async getAllCategory(reqQuery): Promise<CategoryMovie[]> {
-    try {
-      const page = parseInt(reqQuery.page);
-      const rowPerPage = parseInt(reqQuery.rowPerPage);
-      return await this.categoryModel.aggregate([
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'userCreated',
-            foreignField: '_id',
-            as: 'authors',
-          },
+    const page = parseInt(reqQuery.page);
+    const rowPerPage = parseInt(reqQuery.rowPerPage);
+    return await this.categoryModel.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userCreated',
+          foreignField: '_id',
+          as: 'authors',
         },
-        {
-          $project: {
-            'authors.fullname': 1,
-            title: 1,
-            movie: 1,
-          },
+      },
+      {
+        $project: {
+          'authors.fullname': 1,
+          title: 1,
+          movie: 1,
         },
-        {
-          $skip: page ? page * rowPerPage - rowPerPage : 0,
-        },
-        { $limit: rowPerPage ? rowPerPage : 100 },
-      ]);
-    } catch (error) {
-      this.errorRes(error);
-    }
+      },
+      {
+        $skip: page ? page * rowPerPage - rowPerPage : 0,
+      },
+      { $limit: rowPerPage ? rowPerPage : 100 },
+    ]);
   }
 
   async filterCategory(
     query: FilterQuery<CategoryMovieDocument>,
     options: QueryOptions = { learn: true },
   ): Promise<CategoryMovie> {
-    try {
-      return await this.categoryModel.findOne(query, {}, options);
-    } catch (error) {
-      this.errorRes(error);
-    }
+    return await this.categoryModel.findOne(query, {}, options);
   }
 
   async updateCategory(
@@ -84,11 +72,7 @@ export class CategoryMovieRepository extends ErrorResponse {
     update: UpdateQuery<CategoryMovieDocument>,
     options: QueryOptions,
   ): Promise<CategoryMovie> {
-    try {
-      return await this.categoryModel.findOneAndUpdate(query, update, options);
-    } catch (error) {
-      this.errorRes(error);
-    }
+    return await this.categoryModel.findOneAndUpdate(query, update, options);
   }
 
   async deleteCategory(id: string) {
@@ -100,10 +84,6 @@ export class CategoryMovieRepository extends ErrorResponse {
   }
 
   async findById(id: string) {
-    try {
-      return this.categoryModel.findById(id);
-    } catch (error) {
-      this.errorRes(error);
-    }
+    return this.categoryModel.findById(id);
   }
 }

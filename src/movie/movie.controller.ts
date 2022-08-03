@@ -2,6 +2,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Patch,
   Post,
   Req,
@@ -14,7 +15,6 @@ import { MovieService } from './movie.service';
 import { Movie, MovieDocument } from './schema/movie.schema';
 import { buyMovieSchema, idPrams } from './schema/movie.validate';
 import { Request, Response } from 'express';
-import { JsonResponse } from '../helpers';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
@@ -28,16 +28,15 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { BuyMovie, MovieSwagger, SearchMovie } from '../swagger';
-import { Responses } from 'src/commons/response';
-import { DoCode, ResponseMessage } from 'src/commons/consts/response.const';
 import { log } from 'src/commons/logger';
 import { LevelLogger } from 'src/commons/consts/logger.const';
-import { IDataResponse, IResponse } from 'src/commons/interface';
+import { IResponse } from 'src/commons/interface';
 import { v4 as uuidv4 } from 'uuid';
+import { BaseResponse } from 'src/commons/base/base.response';
 
 @ApiTags('movie')
-@Controller('api')
-export class MovieController extends Responses {
+@Controller('movie')
+export class MovieController extends BaseResponse {
   constructor(private movieService: MovieService) {
     super();
   }
@@ -56,12 +55,12 @@ export class MovieController extends Responses {
       stream.pipe(res);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, HttpStatus.BAD_REQUEST, error.message);
     }
   }
 
   @ApiParam({ name: 'id', type: 'string' })
-  @Get('movie/do=download/:id')
+  @Get('download/:id')
   async downloadFileReport(@Req() req: Request, @Res() res: Response) {
     try {
       const { id } = req.params;
@@ -71,91 +70,78 @@ export class MovieController extends Responses {
       });
       const fileName = movie[0].fileName;
       const directoryPath = movie[0].filmLocation;
-      log(req, ResponseMessage.DOWNLOAD_SUCCESS, LevelLogger.INFO);
+      log(req, '=== Donwload ok ===', LevelLogger.INFO);
       res.download(directoryPath, fileName, (err) => {
         if (err) {
-          return res.status(500).json(JsonResponse(true, err.message));
+          return res.status(500).send(err.message);
         }
       });
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, HttpStatus.BAD_REQUEST, error.message);
     }
   }
 
   @UseGuards(AuthGuard('auth'))
   @ApiBody({ type: BuyMovie })
-  @Post('movie/do=buy')
+  @Post('movie/buy')
   async buyMovie(@Req() req: Request, @Res() res: Response) {
     try {
       const userId = (req as IResponse).user._id;
       await buyMovieSchema.validateAsync(req.body);
       await this.movieService.buyMovie(req, userId);
-      log(req, ResponseMessage.BUY_SUCCESS, LevelLogger.INFO);
-      return this.responseJson(res, DoCode.BUY);
+      log(req, '=== Buy success ===', LevelLogger.INFO);
+      return this.responseNoContent(res, HttpStatus.OK);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, HttpStatus.BAD_REQUEST, error.message);
     }
   }
 
-  @Get('movie/do=detail/:id')
+  @Get(':id')
   async getMovieById(@Req() req: Request, @Res() res: Response) {
     try {
       const { id } = req.params;
       await idPrams.validateAsync({ id });
       const idUser = (req as IResponse).user;
       const movie = await this.movieService.getDetailMovie(id, idUser);
-      const total = 1;
-      const data = {
-        dataRes: movie[0],
-        total,
-      };
-      return this.responseJson(res, DoCode.GET, data);
+      return this.responseMessage(res, HttpStatus.OK, 1, movie[0]);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, HttpStatus.BAD_REQUEST, error.message);
     }
   }
 
-  @Post('movie/do=search')
+  @Post('search')
   @ApiBody({ type: SearchMovie })
   async filterMovie(@Req() req: Request, @Res() res: Response) {
     try {
       const movieResult = await this.movieService.searchMovie(req.body);
       const total = await this.movieService.getAllMovie();
-      const data = {
-        dataRes: movieResult,
-        total,
-      };
-      return this.responseJson(res, DoCode.GET, data);
+      return this.responseMessage(res, HttpStatus.OK, total, movieResult);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, HttpStatus.BAD_REQUEST, error.message);
     }
   }
 
   @ApiQuery({ name: 'rowPerPage', type: Number, required: false })
   @ApiQuery({ name: 'page', type: Number, required: false })
-  @Get('movie/do=all')
+  @Get()
   async getAllMovieList(@Req() req: Request, @Res() res: Response) {
     try {
       const dataResult = await this.movieService.getMovie(req.query);
       const total = await this.movieService.getAllMovie();
-      const data = {
-        dataRes: dataResult,
-        total,
-      };
-      log(req, ResponseMessage.OK, LevelLogger.INFO);
-      return this.responseJson(res, DoCode.GET, data);
+      log(req, '=== OK ===', LevelLogger.INFO);
+      return this.responseMessage(res, HttpStatus.OK, total, dataResult);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      this.error(res, error);
+      this.responseError(res, HttpStatus.BAD_REQUEST, error.message);
     }
   }
 
   @ApiBearerAuth('auth')
-  @Get('movie/user')
+  @Get('user')
   @UseGuards(AuthGuard('auth'))
   async getMovieByAccountId(@Req() req: Request, @Res() res: Response) {
     try {
@@ -163,21 +149,17 @@ export class MovieController extends Responses {
       const dataRes: Movie[] = await this.movieService.filterMovie({
         authorCreated: userId._id,
       });
-      const data: IDataResponse<Movie[]> = {
-        dataRes,
-        total: null,
-      };
-      return this.responseJson(res, DoCode.GET, data);
+      return this.responseMessage(res, HttpStatus.OK, 1, dataRes);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, HttpStatus.BAD_REQUEST, error.message);
     }
   }
 
   @ApiBearerAuth('auth')
   @ApiBody({ type: MovieSwagger })
   @ApiConsumes('multipart/form-data')
-  @Post('movie/do=add')
+  @Post()
   @UseGuards(AuthGuard('auth'))
   @UseInterceptors(
     FileInterceptor('file', {
@@ -200,43 +182,47 @@ export class MovieController extends Responses {
       const userId = (req as IResponse).user._id;
       const reqFile = (req as IResponse).file;
       const categoryId = dataJson.categoryMovie;
-      const dataAdd: Movie = await this.movieService.createMovie(
+      await this.movieService.createMovie(
         dataJson,
         userId,
         renameFileUpload,
         reqFile,
         categoryId,
       );
-      return this.responseJson(res, DoCode.CREATE, dataAdd);
+      return this.responseNoContent(res, HttpStatus.CREATED);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, HttpStatus.BAD_REQUEST, error);
     }
   }
 
   @ApiBearerAuth('auth')
   @ApiParam({ name: 'id', type: 'string' })
   @UseGuards(AuthGuard('auth'))
-  @Delete('movie/do=delete/:id')
+  @Delete(':id')
   async deleteMovie(@Req() req: Request, @Res() res: Response) {
     try {
       const user: UserDocument = (req as IResponse).user;
       const { id } = req.params;
       await idPrams.validateAsync({ id });
       await this.movieService.deleteMovieService(id, user);
-      log(req, ResponseMessage.DELETED, LevelLogger.INFO);
-      return this.responseJson(res, DoCode.DELETE);
+      log(req, '=== Deleted ===', LevelLogger.INFO);
+      return this.responseNoContent(res, HttpStatus.OK);
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
-      return this.error(res, error);
+      return this.responseError(res, HttpStatus.BAD_REQUEST, error.message);
     }
   }
 
   @ApiParam({ name: 'id', type: 'string' })
-  @Patch('movie/do=updateview/:id')
+  @Patch(':id')
   async updateViews(@Req() req: Request, @Res() res: Response) {
-    const { id } = req.params;
-    this.movieService.updateMovieService(id);
-    return this.responseJson(res, DoCode.UPDATE);
+    try {
+      const { id } = req.params;
+      await this.movieService.updateMovieService(id);
+      return this.responseNoContent(res, HttpStatus.OK);
+    } catch (error) {
+      return this.responseError(res, HttpStatus.BAD_REQUEST, error.message);
+    }
   }
 }
