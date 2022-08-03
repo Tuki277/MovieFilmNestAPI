@@ -49,8 +49,6 @@ export class UserController extends BaseResponse {
           ? parseInt(req.query.rowPerPage.toString())
           : null,
       };
-
-      console.log((req as ReqUser).user.role);
       const dataResult = await this.userService.getAllUser(
         (req as ReqUser).user.role,
         reqQuery,
