@@ -25,13 +25,7 @@ export class MovieService extends BaseResponse {
     super();
   }
 
-  async createMovie(
-    dataJson,
-    userId,
-    renameFileUpload,
-    reqFile,
-    categoryId,
-  ): Promise<Movie> {
+  async createMovie(dataJson, userId, renameFileUpload, reqFile, categoryId) {
     try {
       if (reqFile != undefined) {
         const category: CategoryMovie =
@@ -43,7 +37,7 @@ export class MovieService extends BaseResponse {
             ...dataJson,
             authorCreated: userId.toString(),
             filmLocation: renameFileUpload,
-            fileName: getDateTimeNow() + reqFile.file,
+            fileName: getDateTimeNow() + reqFile,
           });
           const user: User = await this.userRepository.filterUser({
             _id: userId,
@@ -178,17 +172,20 @@ export class MovieService extends BaseResponse {
         const userFind: UserDocument = await this.userRepository.filterUser({
           _id: idUser,
         });
-        const found = userFind.movieBuy.find((x) => x.toString() == id);
-        if (found !== undefined) {
+        if (userFind) {
+          const found = userFind.movieBuy.find((x) => x.toString() == id);
+          if (found !== undefined) {
+            return {
+              ...movie,
+              watch: true,
+            };
+          }
           return {
             ...movie,
-            watch: true,
+            watch: false,
           };
         }
-        return {
-          ...movie,
-          watch: false,
-        };
+        this.throwError('Not found user', HttpStatus.NOT_FOUND);
       }
       this.throwError('Not found', HttpStatus.NOT_FOUND);
     } catch (error) {

@@ -112,7 +112,6 @@ export class CategoryMovieController extends BaseResponse {
       log(req, '=== Updated ===', LevelLogger.INFO);
       return this.responseNoContent(res, HttpStatus.OK);
     } catch (error) {
-      console.log(error);
       log(req, error.message, LevelLogger.ERROR);
       return this.responseError(res, error.status, error.message);
     }

@@ -42,7 +42,7 @@ export class MovieController extends BaseResponse {
   }
 
   @ApiParam({ name: 'id', type: 'string' })
-  @Get('video/:id')
+  @Get('watch/:id')
   async playVideoStream(@Req() req: Request, @Res() res: Response) {
     try {
       const { id } = req.params;
@@ -70,8 +70,8 @@ export class MovieController extends BaseResponse {
       });
       const fileName = movie[0].fileName;
       const directoryPath = movie[0].filmLocation;
-      log(req, '=== Donwload ok ===', LevelLogger.INFO);
-      res.download(directoryPath, fileName, (err) => {
+      log(req, '=== Download ok ===', LevelLogger.INFO);
+      return res.download(directoryPath, fileName, (err) => {
         if (err) {
           return res.status(500).send(err.message);
         }
@@ -84,7 +84,7 @@ export class MovieController extends BaseResponse {
 
   @UseGuards(AuthGuard('auth'))
   @ApiBody({ type: BuyMovie })
-  @Post('movie/buy')
+  @Post('buy')
   async buyMovie(@Req() req: Request, @Res() res: Response) {
     try {
       const userId = (req as IResponse).user._id;
@@ -105,7 +105,10 @@ export class MovieController extends BaseResponse {
       await idPrams.validateAsync({ id });
       const idUser = (req as IResponse).user;
       const movie = await this.movieService.getDetailMovie(id, idUser);
-      return this.responseMessage(res, HttpStatus.OK, 1, movie[0]);
+      return this.responseMessage(res, HttpStatus.OK, 1, {
+        ...movie[0],
+        watch: movie.watch,
+      });
     } catch (error) {
       log(req, error.message, LevelLogger.ERROR);
       return this.responseError(res, HttpStatus.BAD_REQUEST, error.message);
@@ -141,7 +144,7 @@ export class MovieController extends BaseResponse {
   }
 
   @ApiBearerAuth('auth')
-  @Get('user')
+  @Post('user')
   @UseGuards(AuthGuard('auth'))
   async getMovieByAccountId(@Req() req: Request, @Res() res: Response) {
     try {
@@ -180,7 +183,7 @@ export class MovieController extends BaseResponse {
         locationFileUpload + (req as IResponse).file.path;
       const dataJson = JSON.parse(req.body.data);
       const userId = (req as IResponse).user._id;
-      const reqFile = (req as IResponse).file;
+      const reqFile = (req as IResponse).file.path;
       const categoryId = dataJson.categoryMovie;
       await this.movieService.createMovie(
         dataJson,

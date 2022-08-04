@@ -39,10 +39,6 @@ export class MovieRepository extends BaseResponse {
       { _id: movie.categoryMovie },
       { $pull: { movie: movie._id.toString() } },
     );
-    await this.userModel.findByIdAndUpdate(
-      { _id: movie.authorCreated },
-      { $pull: { movie: movie._id.toString() } },
-    );
     return this.movieModel.findByIdAndRemove(id);
   }
 

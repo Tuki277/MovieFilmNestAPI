@@ -21,7 +21,6 @@ export class UserRepository {
   getAllUser(role: number, reqQuery: IPaging) {
     const page = reqQuery.page;
     const rowPerPage = reqQuery.rowPerPage;
-    console.log(reqQuery);
     const dataRes = this.userModel
       .find({
         role: { $gte: role },

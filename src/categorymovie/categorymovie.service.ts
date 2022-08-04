@@ -58,7 +58,6 @@ export class CategoryMovieService extends BaseResponse {
   ): Promise<CategoryMovie> {
     try {
       const dataResult = await this.filterCategory(query, { lean: true });
-      console.log({ dataResult });
       if (dataResult) {
         return this.categoryMovieRepository.updateCategory(
           query,
