@@ -12,7 +12,7 @@
     "start": "nest start",
     "start:dev": "env-cmd -f .env.production nest start --watch",
     "start:product": "env-cmd -f .env.production  nest start --watch",
-    "start:deploy": "env-cmd -f .env.deploy nest --max-old-space-size=4096 start --watch",
+    "start:deploy": "env-cmd -f .env.deploy nest --max-old-space-size=512 start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
